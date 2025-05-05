@@ -1,4 +1,18 @@
 services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "6070:6070"
+    volumes:
+      - ./config/Caddyfile.local:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - TZ=UTC
+
   zoekt-indexserver:
     build:
       context: .
@@ -24,8 +38,8 @@ services:
       - ./data/index:/data/index
       - ./config/templates:/app/config/templates
     restart: unless-stopped
-    ports:
-      - "6070:6070"
+    # We'll remove the port binding here since Caddy will handle it
+    # This prevents the port conflict on your local machine
     depends_on:
       - zoekt-indexserver
     environment:
@@ -46,3 +60,7 @@ services:
       - zoekt-indexserver
     environment:
       - TZ=UTC
+
+volumes:
+  caddy_data:
+  caddy_config:

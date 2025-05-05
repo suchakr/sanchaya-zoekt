@@ -1,0 +1,36 @@
+# Development configuration that works locally without HTTPS
+# For local development on your machine
+:6070 {
+    # Simple reverse proxy to the zoekt-webserver
+    reverse_proxy zoekt-webserver:6070 {
+        # Preserve the original Host header
+        header_up Host {http.request.host}
+    }
+}
+
+# Production configuration for your server with HTTPS
+# Uncomment this block when deploying to production
+# sanchaya.ddns.net {
+#     # Enable automatic HTTPS with Let's Encrypt
+#     tls {
+#         protocols tls1.2 tls1.3
+#     }
+#
+#     # Enable basic compression
+#     encode zstd gzip
+#
+#     # Reverse proxy to the zoekt-webserver
+#     reverse_proxy zoekt-webserver:6070 {
+#         # Preserve the original Host header
+#         header_up Host {http.request.host}
+#         # Forward the client IP
+#         header_up X-Real-IP {http.request.remote}
+#         header_up X-Forwarded-For {http.request.remote}
+#         header_up X-Forwarded-Proto {http.request.scheme}
+#     }
+#
+#     # Log requests
+#     log {
+#         output stdout
+#     }
+# }
