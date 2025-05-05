@@ -102,7 +102,7 @@ After=network.target zoekt-indexserver.service
 [Service]
 Type=simple
 User=zoekt
-ExecStart=/usr/local/bin/zoekt-webserver -listen :${WEBSERVER_PORT} -index ${INDEX_DIR} -rpc_index :${INDEXSERVER_PORT}
+ExecStart=/usr/local/bin/zoekt-webserver -listen 0.0.0.0:${WEBSERVER_PORT} -index ${INDEX_DIR} -rpc_index :${INDEXSERVER_PORT}
 Restart=on-failure
 StandardOutput=append:${LOG_DIR}/webserver.log
 StandardError=append:${LOG_DIR}/webserver.error.log
