@@ -1,0 +1,41 @@
+{
+  "promptText": "I need an zoekt server that indexes my sanchaya github repo with text files in devanagri and other indic scripts and provides an login-less web ui that allows users to search the repo.  The app should have its own git repo. I need the app to be testable locally on dev mac and deployable on VM by pulling code from github and executing install/deploy scripts"
+}
+
+Create a self-hosted search application that indexes and provides full-text search capabilities for Indic language content from the Sanchaya GitHub repository, with the following specifications:
+
+Core Requirements:
+- Implement a Zoekt search server instance configured for Unicode/Indic script support
+- Index all text files containing Devanagari and other Indic scripts from the Sanchaya repository
+- Provide a public web interface for searching without authentication
+- Support fuzzy search and relevant result highlighting
+- Include READMEs in English for setup and usage
+
+Development Environment:
+- Must run on macOS for local development
+- Include automated tests for core functionality
+- Document dependencies and environment setup
+
+Deployment:
+- Provide shell scripts for automated installation and deployment
+- Include configuration files for common VM environments
+- Document system requirements and necessary permissions
+- Support deployment via Git clone and script execution
+
+Repository Structure:
+- Maintain as a separate Git repository
+- Include clear directory structure for server, web UI, and scripts
+- Keep all source code in a single repository and keep folder as flat as possible
+- Use a consistent naming convention for files and directories
+
+Performance Requirements:
+- Support concurrent searches
+- Implement efficient indexing for large text files
+- Include monitoring for server health
+
+Documentation Deliverables:
+- Local development setup guide
+- Deployment instructions
+- API documentation if applicable
+- Troubleshooting guide
+- Performance tuning recommendations
