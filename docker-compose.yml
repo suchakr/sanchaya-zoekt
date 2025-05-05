@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: sanchaya-zoekt-web
-    command: ["zoekt-webserver", "-listen", ":6070", "-index", "/data/index", "-template_dir", "/app/config/templates"]
+    command: ["zoekt-webserver", "-listen", "0.0.0.0:6070", "-index", "/data/index", "-template_dir", "/app/config/templates"]
     volumes:
       - ./data/index:/data/index
       - ./config/templates:/app/config/templates
