@@ -1,4 +1,4 @@
-FROM golang:1.21-bullseye
+FROM golang:1.24-bullseye
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -7,9 +7,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Zoekt tools (Go 1.17+ syntax)
-RUN go install github.com/google/zoekt/cmd/zoekt-webserver@main && \
-    go install github.com/google/zoekt/cmd/zoekt-indexserver@main && \
-    go install github.com/google/zoekt/cmd/zoekt-git-index@main
+RUN go install github.com/sourcegraph/zoekt/cmd/zoekt-webserver@main && \
+    go install github.com/sourcegraph/zoekt/cmd/zoekt-indexserver@main && \
+    go install github.com/sourcegraph/zoekt/cmd/zoekt-git-index@main
 
 # Add Go bin to PATH
 ENV PATH="/root/go/bin:${PATH}"

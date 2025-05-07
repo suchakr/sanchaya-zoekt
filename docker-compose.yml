@@ -51,7 +51,7 @@ services:
       dockerfile: Dockerfile
     image: sanchaya-zoekt-indexer-run
     # command: ["/bin/bash", "-c", "git clone https://github.com/cahcblr/sanchaya /data/repos/sanchaya || (cd /data/repos/sanchaya && git pull) && zoekt-git-index -index=/data/index -repo_cache=/data/repos -require_ctags=false -incremental -branch main /data/repos/sanchaya"]
-    command: ["/bin/bash", "-c", "git clone https://github.com/cahcblr/sanchaya.git /data/repos/sanchaya || (cd /data/repos/sanchaya && git pull) && zoekt-git-index -index=/data/index -repo_cache=/data/repos -require_ctags=false -incremental -branches main /data/repos/sanchaya"]
+    command: ["/bin/bash", "-c", "git clone https://github.com/cahcblr/sanchaya.git /data/repos/sanchaya || (cd /data/repos/sanchaya && git pull) && zoekt-git-index -index=/data/index -repo_cache=/data/repos -file_limit 35984136 -require_ctags=false -branches main /data/repos/sanchaya"]
     volumes:
       - ./data/index:/data/index
       - ./data/repos:/data/repos
