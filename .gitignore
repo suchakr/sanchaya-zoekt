@@ -60,3 +60,4 @@ log/
 # Generated files
 coverage.txt
 profile.out
+dump_templates/*

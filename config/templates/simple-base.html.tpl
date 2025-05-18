@@ -12,7 +12,7 @@
 </head>
 <body>
   <header>
-    <h1><span class="sanchaya-brand">सञ्चयः</span> Code Search</h1>
+    <h1><span class="sanchaya-brand">सञ्चयः</span> Search</h1>
   </header>
   <div>
     {{template "body" .}}

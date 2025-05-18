@@ -8,11 +8,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- The above 3 meta tags *must* come first in the head -->
-  <meta name="description" content="सञ्चयः (Sanchaya) Code Search">
+  <meta name="description" content="सञ्चयः (Sanchaya) Search">
   <meta name="author" content="">
   <link rel="icon" href="data:image/gif;base64,R0lGODlhEAAQAKIAAP///8zMzJmZmWZmZjMzMwAAAAAAAAAAACH5BAEAAAUALAAAAAAQABAAAAMoGLrc/jAuQWuxsVoePnsRNoJgR00AznRDJZbBJ6LM1bmVat+OXucXAQA7">
 
-  <title>{{if .Last}}Search result - {{.Last}} {{end}}सञ्चयः (Sanchaya) Code Search</title>
+  <title>{{if .Last}}Search result - {{.Last}} {{end}}सञ्चयः (Sanchaya) Search</title>
 
   <!-- Bootstrap core CSS -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -21,15 +21,16 @@
   <style>
     /* Base template styles */
     .zoekt-h1 {
-      color: #990000;
+      color: #FF0000;  /* Changed to bright red for testing */
       font-family: 'Arial Unicode MS', 'Marathi Harsh', serif;
+      font-size: 32px; /* Made larger for testing */
     }
     
     /* Add Sanchaya branding styles */
     .sanchaya-brand {
-      font-size: 24px;
+      font-size: 28px; /* Made larger for testing */
       margin-right: 10px;
-      color: #8B0000;
+      color: #0000FF; /* Changed to blue for testing */
       font-weight: bold;
       font-family: 'Arial Unicode MS', 'Nirmala UI', serif;
     }
@@ -179,7 +180,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/"><span class="sanchaya-brand">सञ्चयः</span> Code Search</a>
+        <a class="navbar-brand" href="/"><span class="sanchaya-brand">सञ्चयः</span> Search</a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">

@@ -1,6 +1,6 @@
 {{define "body"}}
-<div class="banner">
-  <h1 class="zoekt-h1"><span class="sanchaya-brand">सञ्चयः</span> Code Search</h1>
+<div class="banner" style="background-color: #FFFF00; padding: 15px; margin-bottom: 20px;">
+  <h1 class="zoekt-h1"><span class="sanchaya-brand">सञ्चयः</span> Search - TEST CHANGE</h1>
 </div>
 <form action="search">
 <div class="input-group input-group-lg">
