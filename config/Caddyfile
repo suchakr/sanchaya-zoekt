@@ -45,6 +45,7 @@ sanchaya.mooo.com {
     encode zstd gzip
 
     # Reverse proxy to the Sourcegraph frontend service on the other docker network
+    # 172.17.0.1 is the Docker host IP address
     reverse_proxy 172.17.0.1:7080 {
         # Preserve the original Host header
         header_up Host {http.request.host}
