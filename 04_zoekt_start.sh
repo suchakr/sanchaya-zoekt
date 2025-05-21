@@ -78,7 +78,7 @@ fi
 
 # Check if containers are running
 echo -e "${YELLOW}Verifying services...${NC}"
-expected_containers=("zoekt-webserver" "caddy")
+expected_containers=("zoekt-webserver" "zoekt-caddy")
 all_running=true
 
 for container in "${expected_containers[@]}"; do

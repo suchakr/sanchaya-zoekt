@@ -13,7 +13,7 @@ echo -e "${YELLOW}Stopping Zoekt services...${NC}"
 
 # Function to check if any zoekt containers are still running
 check_containers_stopped() {
-    running_containers=$(docker ps --filter "name=zoekt|caddy" --format "{{.Names}}" 2>/dev/null)
+    running_containers=$(docker compose ps --status running -q 2>/dev/null)
     if [ -z "$running_containers" ]; then
         return 0
     else
@@ -36,7 +36,6 @@ if check_containers_stopped; then
     echo -e "${GREEN}✅ All Zoekt services stopped successfully${NC}"
 else
     echo -e "${RED}⚠️ Some containers are still running:${NC}"
-    docker ps --filter "name=zoekt|caddy" --format "table {{.Names}}\t{{.Status}}"
+    docker compose ps --format "table {{.Names}}\t{{.Status}}"
     echo -e "${YELLOW}You may need to stop them manually with:${NC}"
-    echo "docker stop \$(docker ps -q --filter 'name=zoekt|caddy')"
 fi
