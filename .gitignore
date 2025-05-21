@@ -61,3 +61,4 @@ log/
 coverage.txt
 profile.out
 dump_templates/*
+.checkpoints/**

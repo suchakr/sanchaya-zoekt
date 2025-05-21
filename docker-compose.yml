@@ -1,6 +1,7 @@
 services:
   caddy:
     image: caddy:2
+    container_name: caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -13,35 +14,19 @@ services:
     environment:
       - TZ=UTC
 
-  zoekt-indexserver:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: sanchaya-zoekt-indexer
-    command: ["zoekt-indexserver", "-data_dir", "/data", "-index_dir", "/data/index"]
-    volumes:
-      - ./data/index:/data/index
-      - ./data/repos:/data/repos
-    restart: unless-stopped
-    ports:
-      - "6072:6072"
-    environment:
-      - TZ=UTC
-
   zoekt-webserver:
     build:
       context: .
       dockerfile: Dockerfile
     image: sanchaya-zoekt-web
+    container_name: zoekt-webserver
     command: ["zoekt-webserver", "-listen", "0.0.0.0:6070", "-index", "/data/index", "-template_dir", "/app/config/templates"]
     volumes:
       - ./data/index:/data/index
       - ./config/templates:/app/config/templates
     restart: unless-stopped
-    # We'll remove the port binding here since Caddy will handle it
-    # This prevents the port conflict on your local machine
     depends_on:
-      - zoekt-indexserver
+      - caddy
     environment:
       - TZ=UTC
 
@@ -50,14 +35,13 @@ services:
       context: .
       dockerfile: Dockerfile
     image: sanchaya-zoekt-indexer-run
-    # command: ["/bin/bash", "-c", "git clone https://github.com/cahcblr/sanchaya /data/repos/sanchaya || (cd /data/repos/sanchaya && git pull) && zoekt-git-index -index=/data/index -repo_cache=/data/repos -require_ctags=false -incremental -branch main /data/repos/sanchaya"]
     command: ["/bin/bash", "-c", "git clone https://github.com/cahcblr/sanchaya.git /data/repos/sanchaya || (cd /data/repos/sanchaya && git pull) && zoekt-git-index -index=/data/index -repo_cache=/data/repos -file_limit 40000000 -max_trigram_count 2000000 -shard_limit 200000000 -parallelism 8 -large_file \"*.txt\" -require_ctags=false -branches main /data/repos/sanchaya"]
     volumes:
       - ./data/index:/data/index
       - ./data/repos:/data/repos
     restart: "no"
     depends_on:
-      - zoekt-indexserver
+      - zoekt-webserver
     environment:
       - TZ=UTC
 

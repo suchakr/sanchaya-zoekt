@@ -15,10 +15,10 @@
       <div class="col-md-8">
         <h3>Search examples:</h3>
         <dl class="dl-horizontal">
-          <dt><a href="search?q=%E0%A4%A4%E0%A4%AA%E0%A4%83%E0%A4%B8%E0%A5%8D%E0%A4%B5%E0%A4%BE%E0%A4%A7%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%AF%E0%A4%A8%E0%A4%BF%E0%A4%B0%E0%A4%A4%E0%A4%82">तपःस्वाध्यायनिरतं</a></dt><dd>search for "तपःस्वाध्यायनिरतं" (from the opening of Ramayana)</dd>
           <dt><a href="search?q=%22%E0%A4%A4%E0%A4%BF%E0%A4%AE%E0%A4%BF%E0%A4%B0%E0%A4%BE+%E0%A4%AA%E0%A4%B9%E0%A4%83%22">"तिमिरा पहः"</a></dt><dd>search for the exact phrase "तिमिरा पहः"</dd>
           <dt><a href="search?q=%E0%AE%85%E0%AE%AE%E0%AF%8D+%E0%AE%95%E0%AE%AF%E0%AE%B2%E0%AF%8D+%E0%AE%AA%E0%AE%BE%E0%AE%AF%E0%AF%8D">அம் கயல் பாய்</a></dt><dd>search for texts containing "அம் கயல் பாய்" (Tamil text)</dd>
           <dt><a href="search?q=%E0%A4%B8%E0%A4%B0%E0%A5%8D%E0%A4%B5%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%B5%E0%A4%B0+%E0%A4%A8%E0%A4%BF%E0%A4%AF%E0%A5%81%E0%A4%A3%E0%A4%AE%E0%A5%8D">सर्वेश्वर नियुणम्</a></dt><dd>search for texts containing both "सर्वेश्वर" and "नियुणम्"</dd>
+          <dt><a href="search?q=%E0%A4%A4%E0%A4%AA%E0%A4%83%E0%A4%B8%E0%A5%8D%E0%A4%A5%E0%A4%BE">तपःस्था</a></dt><dd>search for "तपःस्था" or similar words</dd>
           <dt><a href="search?q=%E0%A4%A4%E0%A4%BF%E0%A4%AE%E0%A4%BF%E0%A4%B0%E0%A4%BE+file%3APur">तिमिरा file:Pur</a></dt><dd>search for "तिमिरा" in files containing "Pur" in their path</dd>
         </dl>
         
@@ -69,6 +69,7 @@
               <li>Search for exact phrases using quotes: <code>"आदि काव्य"</code></li>
               <li>Use <code>file:</code> to search within specific sections, like <code>file:Puranani</code></li>
               <li>Multi-language support: Sanskrit, Tamil, Prakrit, and English texts are all searchable</li>
+              <li>Sanskrit terms are fully searchable with diacritics</li>
               <li>Click "Show Advanced Search Options" for more ways to search</li>
             </ul>
           </div>

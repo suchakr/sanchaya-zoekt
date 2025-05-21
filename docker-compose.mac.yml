@@ -1,0 +1,15 @@
+# Mac-specific configurations for zoekt
+# This file is used with mac_up.sh and mac_down.sh
+
+services:
+  zoekt-webserver:
+    volumes:
+      - ./data/index:/data/index
+      - ./config/templates:/app/config/templates
+    user: "root"
+
+  indexer:
+    volumes:
+      - ./data/index:/data/index
+      - ./data/repos:/data/repos
+    user: "root"

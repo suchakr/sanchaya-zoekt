@@ -1,0 +1,13 @@
+# This file provides volume overrides for the zoekt deployment
+# It can be modified to change the location of data directories
+
+services:
+  zoekt-webserver:
+    volumes:
+      - ${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}/index:/data/index
+      - ./config/templates:/app/config/templates
+
+  indexer:
+    volumes:
+      - ${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}/index:/data/index
+      - ${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}/repos:/data/repos
