@@ -1,17 +1,38 @@
-{{define "body"}}
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="sanchaya-brand">सञ्चयः</span> Zoekt Code Search</h3>
+
+
+<html>
+  {{template "head"}}
+  <title>About सञ्चयः (Sanchaya) Search</title>
+<body>
+
+
+  <div class="jumbotron" style="background-color: #f5f5f5;">
+    <div class="container">
+      <h1 class="zoekt-h1"><span class="sanchaya-brand">सञ्चयः</span> <span style="font-size: 24px;">Search</span></h1>
+      {{template "searchbox" .Last}}
+    </div>
   </div>
-  <div class="panel-body">
+
+  <div class="container">
     <p>
-      Zoekt is a full-text search engine that indexes code from git repositories.
-      This implementation is customized for searching Sanchaya content with Indic script support.
+      This is <span class="sanchaya-brand">सञ्चयः</span> (Sanchaya), a customized version of <a href="http://github.com/sourcegraph/zoekt"><em>zoekt</em> (IPA: /zukt/)</a>,
+      an open-source full text search engine optimized for Sanskrit and Indic text search.
     </p>
     <p>
-      Source code: <a href="https://github.com/suchakr/sanchaya-zoekt">https://github.com/suchakr/sanchaya-zoekt</a><br>
-      Original Zoekt: <a href="https://github.com/google/zoekt">https://github.com/google/zoekt</a><br>
+    {{if .Version}}<em>Zoekt</em> version {{.Version}}, uptime{{else}}Uptime{{end}} {{.Uptime}}
+    </p>
+
+    <p>
+    Used {{HumanUnit .Stats.IndexBytes}} memory for
+    {{.Stats.Documents}} documents ({{HumanUnit .Stats.ContentBytes}})
+    from {{.Stats.Repos}} repositories.
     </p>
   </div>
-</div>
-{{end}}
+
+  <nav class="navbar navbar-default navbar-bottom">
+    <div class="container">
+      {{template "footerBoilerplate"}}
+      <p class="navbar-text navbar-right">
+      </p>
+    </div>
+  </nav>

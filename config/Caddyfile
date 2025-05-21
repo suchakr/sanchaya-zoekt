@@ -8,7 +8,7 @@
     }
 }
 
-sanchaya.ddns.net {
+sanchaya.mooo.info {
     # Enable automatic HTTPS with Let's Encrypt
     tls {
         protocols tls1.2 tls1.3
@@ -35,7 +35,7 @@ sanchaya.ddns.net {
 }
 
 # New entry for Sourcegraph domain
-sanchaya.mooo.com {
+sanchaya-sg.mooo.info {
     # Enable automatic HTTPS with Let's Encrypt
     tls {
         protocols tls1.2 tls1.3
