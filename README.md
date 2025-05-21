@@ -131,7 +131,7 @@ The first section reverse proxies requests to the `zoekt-webserver` service, whi
 
 The second section handles HTTPS requests for the `sanchaya.mooo` domain. It also redirects HTTP requests to HTTPS. The `header_up` directive sets the `Host` header to the original request's host, which is important for proper routing.
 ```
-sanchaya.mooo {
+sanchaya.mooo.info {
     tls {
         protocols tls1.2 tls1.3
     }
@@ -147,7 +147,7 @@ The third section handles HTTPS/HTTP requests for the `sanchaya-sg.mooo` domain 
 That sourcegraph-sanchaya repository is available at https://github.com/yourusername/sanchaya-sourcegraph.git
 
 ```
-sanchaya-sg.mooo.com {
+sanchaya-sg.mooo.info {
    tls {
         protocols tls1.2 tls1.3
     }
