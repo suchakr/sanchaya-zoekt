@@ -8,7 +8,7 @@
     }
 }
 
-sanchaya.rasowshi.us{
+sanchaya.rasowshi.us {
     # Enable automatic HTTPS with Let's Encrypt
     tls {
         protocols tls1.2 tls1.3
