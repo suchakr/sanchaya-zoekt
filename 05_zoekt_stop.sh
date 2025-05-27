@@ -28,7 +28,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
     docker compose -f docker-compose.yml -f docker-compose.mac.yml down
 else
     # Stop the services with default config
-    docker compose down
+    sudo docker compose down
 fi
 
 # Verify all containers are stopped

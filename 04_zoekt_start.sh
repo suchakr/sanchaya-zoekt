@@ -73,7 +73,7 @@ else
     fi
     
     # Start the services with the default config
-    docker compose up -d
+    sudo docker compose up -d
 fi
 
 # Check if containers are running
