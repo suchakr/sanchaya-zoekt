@@ -30,6 +30,7 @@ ZOEKT_DATA_DIR="${DOCKER_DATA_ROOT}/sanchaya-zoekt-data"
 # Check for existing partitions
 echo "Checking disk partitioning..."
 PARTITION_COUNT=$(sudo fdisk -l "${PERSISTENT_DISK_DEVICE}" | grep "^/dev" | wc -l)
+echo "${PARTITION_COUNT} partitions found."
 
 if [ "${PARTITION_COUNT}" -eq 0 ]; then
     echo "Creating new GPT partition table and partition..."
@@ -69,3 +70,17 @@ sudo chmod -R 777 "${ZOEKT_DATA_DIR}"
 # Create checkpoint
 touch ./.checkpoints/02_disk_setup.done
 echo "✅ Stage 2: Disk setup complete"
+
+# Show disk usage and advise user
+echo
+echo "Disk usage summary:"
+df -h
+
+mnt_size=$(df -h | awk '$6=="/mnt/docker-data"{print $2}')
+mnt_size_gb=$(echo "$mnt_size" | grep -oE '^[0-9]+')
+
+if [ -n "$mnt_size_gb" ] && [ "$mnt_size_gb" -ge 90 ]; then
+    echo "✅ /mnt/docker-data is mounted with approximately ${mnt_size} of space."
+else
+    echo "⚠️  Warning: /mnt/docker-data is not mounted with a ~100G disk. Please check your disk setup."
+fi

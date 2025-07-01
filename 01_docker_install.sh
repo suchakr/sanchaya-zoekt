@@ -39,3 +39,19 @@ echo "Docker Compose V2 is available."
 mkdir -p ./.checkpoints
 touch ./.checkpoints/01_docker_install.done
 echo "✅ Stage 1: Docker installation check complete"
+
+# Check if user is in the docker group
+if ! groups "$USER" | grep -q '\bdocker\b'; then
+    echo
+    echo "===================================================================="
+    echo "Docker is installed, but your user is not in the 'docker' group."
+    echo "To continue, run:"
+    echo
+    echo "  sudo usermod -aG docker \$USER"
+    echo "  newgrp docker"
+    echo
+    echo "This will open a new shell with Docker permissions enabled."
+    echo "Then proceed to run 02_disk_setup.sh in the new shell."
+    echo "===================================================================="
+    exit 0
+fi
