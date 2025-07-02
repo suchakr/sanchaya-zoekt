@@ -8,7 +8,7 @@
     }
 }
 
-sanchaya.rasowshi.us {
+sanchaya.mooo.info {
     # Enable automatic HTTPS with Let's Encrypt
     tls {
         protocols tls1.2 tls1.3
@@ -35,7 +35,7 @@ sanchaya.rasowshi.us {
 }
 
 # New entry for Sourcegraph domain
-sanchaya-sg.rasowshi.us {
+sanchaya-sg.mooo.info {
     # Enable automatic HTTPS with Let's Encrypt
     tls {
         protocols tls1.2 tls1.3
