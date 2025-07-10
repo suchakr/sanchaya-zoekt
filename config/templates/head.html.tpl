@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="सञ्चयः (Sanchaya) - Sanskrit and Indic Text Search">
 <meta name="author" content="">
+<!-- Google tag (gtag.js) -->
+<script>
+  if (window.location.hostname === "sanchaya.rasowshi.us") {
+    var gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-NCNTYPNR00";
+    document.head.appendChild(gaScript);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-NCNTYPNR00');
+  }
+</script>
 <link rel="icon" href="data:image/gif;base64,R0lGODlhEAAQAKIAAP///8zMzJmZmWZmZjMzMwAAAAAAAAAAACH5BAEAAAUALAAAAAAQABAAAAMoGLrc/jAuQWuxsVoePnsRNoJgR00AznRDJZbBJ6LM1bmVat+OXucXAQA7">
 <!-- Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE) -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
