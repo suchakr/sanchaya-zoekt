@@ -27,8 +27,8 @@ if [[ "$(uname)" == "Darwin" ]]; then
     # Stop services with macOS config
     docker compose -f docker-compose.yml -f docker-compose.mac.yml down
 else
-    # Stop the services with default config
-    sudo docker compose down
+    # Stop the services with production port bindings
+    sudo env CADDYFILE=./config/Caddyfile.prod docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 fi
 
 # Verify all containers are stopped

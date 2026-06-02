@@ -11,7 +11,7 @@
       </button>
     </div>
     <div class="navbar-collapse collapse" id="navbar-collapse" aria-expanded="false" style="height: 1px;">
-      <form class="navbar-form navbar-left" action="search">
+      <form class="navbar-form navbar-left" action="search" data-sanchaya-search-form>
         <div class="form-group">
           <input class="form-control"
                 placeholder="Search for some code..." role="search"
@@ -28,6 +28,7 @@
             <input class="form-control" id="context" name="ctx" type="number" value="{{.Ctx}}">
           </div>
           <button class="btn btn-primary">Search</button>
+          <span class="help-block sanchaya-search-guard" aria-live="polite"></span>
           <!--Hack: we use a hidden form field to keep track of the debug flag across searches-->
           {{if .Debug}}<input id="debug" name="debug" type="hidden" value="{{.Debug}}">{{end}}
         </div>

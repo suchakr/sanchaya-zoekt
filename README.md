@@ -28,7 +28,8 @@ sanchaya-zoekt/
 ├── 05_zoekt_stop.sh        # Stop services
 ├── docker-compose.yml              # Main Docker Compose configuration
 ├── docker-compose.override.yml     # linux-specific configuration
-└── docker-compose.mac.yml          # macOS-specific configuration
+├── docker-compose.mac.yml          # macOS-specific configuration
+└── docker-compose.prod.yml         # production HTTP/HTTPS port bindings
 ```
 
 ## Requirements
@@ -61,7 +62,7 @@ This application consists of three main components:
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/yourusername/sanchaya-zoekt.git
+   git clone https://github.com/suchakr/sanchaya-zoekt.git
    cd sanchaya-zoekt
    ```
 
@@ -94,11 +95,58 @@ This application consists of three main components:
 
 4. Access the search interface at: `http://localhost:6070`
 
+   Local development exposes only port `6070` and uses `config/Caddyfile`.
+   Public HTTP/HTTPS ports `80` and `443` plus the `sanchaya.rasowshi.us`
+   virtual host are added only for Linux production deployment, where the
+   scripts select `config/Caddyfile.prod`.
+
 5. To stop the services:
 
    ```bash
    ./05_zoekt_stop.sh
    ```
+
+## CLI Search (without browser)
+
+Install the `zoekt` CLI once using Go:
+
+```bash
+go install github.com/sourcegraph/zoekt/cmd/zoekt@main
+```
+
+Add Go binaries to your PATH in `~/.bashrc`:
+
+```bash
+export PATH="$HOME/go/bin:$PATH"
+source ~/.bashrc
+```
+
+**Optional — set this project's index as default** so `zoekt` works from any directory:
+
+```bash
+ln -s /path/to/sanchaya-zoekt/data/index ~/.zoekt
+```
+
+**Search:**
+
+```bash
+# Basic search (uses ~/.zoekt if symlinked, else specify -index_dir)
+zoekt "search term"
+
+# Explicit index path (no symlink needed)
+zoekt -index_dir /path/to/sanchaya-zoekt/data/index "search term"
+
+# Case-insensitive
+zoekt -i "search term"
+
+# Restrict to a specific repo
+zoekt -repo sanchaya "search term"
+
+# Show file paths only (no snippet)
+zoekt -l "search term"
+```
+
+CLI output lists matching files, line numbers, and surrounding context. Useful for scripting or quick lookups without starting Docker.
 
 ## Data Storage
 
@@ -119,19 +167,17 @@ export ZOEKT_DATA_DIR=/path/to/your/data/directory
 
 ### Caddy Configuration
 
-The Caddy web server is configured to serve the search interface. The configuration file is located at `config/Caddyfile`.
+The local Caddy web server is configured to serve the search interface at `http://localhost:6070` using `config/Caddyfile`.
 
-There are three sections in this Caddyfile:
-
-The first section reverse proxies requests to the `zoekt-webserver` service, which serves the search interface at port 6070.  This is meant to verify locally that the web server is working. It is best not to expose this port to the outside world when running in production.
+The local Caddyfile reverse proxies requests to the `zoekt-webserver` service, which serves the search interface at port 6070. This is meant to verify locally that the web server is working.
 ```
 :6070 {
     reverse_proxy zoekt-webserver:6070
 ```
 
-The second section handles HTTPS requests for the `sanchaya.mooo` domain. It also redirects HTTP requests to HTTPS. The `header_up` directive sets the `Host` header to the original request's host, which is important for proper routing.
+The production Caddyfile is `config/Caddyfile.prod`. It keeps the local `:6070` listener and adds HTTPS requests for the `sanchaya.rasowshi.us` domain. It also redirects HTTP requests to HTTPS. The `header_up` directive sets the `Host` header to the original request's host, which is important for proper routing.
 ```
-sanchaya.mooo.info {
+sanchaya.rasowshi.us {
     tls {
         protocols tls1.2 tls1.3
     }
@@ -142,20 +188,7 @@ sanchaya.mooo.info {
 }
 ```
 
-The third section handles HTTPS/HTTP requests for the `sanchaya-sg.mooo` domain them to the sourcegraph service assumed to be running on port 7080 as a docker container. This is a temporary solution until the sourcegraph service is fully integrated into the project.
-
-That sourcegraph-sanchaya repository is available at https://github.com/yourusername/sanchaya-sourcegraph.git
-
-```
-sanchaya-sg.mooo.info {
-   tls {
-        protocols tls1.2 tls1.3
-    }
-    reverse_proxy 172.17.0.1:7080  { # sourcegraph service
-         header_up Host {http.request.host}
-   }
-}
-```
+Sourcegraph is intentionally not part of the default Caddy configuration. If you still need to proxy an independently managed Sourcegraph deployment, use `config/Caddyfile.sourcegraph.example` as a starting point in a separate Caddy deployment or copy it into `config/Caddyfile` only for that host. This keeps the Zoekt deployment independent of the defunct Sourcegraph experiment.
 
 If you know what you're doing, you can modify the Caddyfile to suit your needs. For example, you can change the domain names, add more reverse proxy rules, or enable additional Caddy features.
 

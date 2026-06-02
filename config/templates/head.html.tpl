@@ -75,5 +75,6 @@
   :target { background-color: #ccf; }
   table tbody tr td { border: none !important; padding: 2px !important; }
 </style>
+{{template "searchGuardAssets"}}
 </head>
   

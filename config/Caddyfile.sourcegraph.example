@@ -1,0 +1,25 @@
+# Optional Sourcegraph proxy.
+#
+# This project does not run Sourcegraph. Keep this block in a separate Caddy
+# deployment or copy it into config/Caddyfile only when an external Sourcegraph
+# frontend is intentionally available at SOURCEGRAPH_UPSTREAM.
+
+sanchaya-sg.rasowshi.us {
+    tls {
+        protocols tls1.2 tls1.3
+    }
+
+    encode zstd gzip
+
+    reverse_proxy {$SOURCEGRAPH_UPSTREAM:172.17.0.1:7080} {
+        header_up Host {http.request.host}
+        header_up X-Real-IP {http.request.remote}
+        header_up X-Forwarded-For {http.request.remote}
+        header_up X-Forwarded-Proto {http.request.scheme}
+    }
+
+    log {
+        output file /var/log/caddy/sourcegraph-access.log
+        format console
+    }
+}

@@ -141,6 +141,7 @@
       fill: white;
     }
   </style>
+  {{template "searchGuardAssets"}}
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->

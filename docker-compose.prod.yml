@@ -1,0 +1,10 @@
+# Production port bindings for public HTTP/HTTPS.
+#
+# Local development intentionally exposes only :6070 from docker-compose.yml so
+# it does not collide with an existing local web server on :80 or :443.
+
+services:
+  caddy:
+    ports:
+      - "80:80"
+      - "443:443"

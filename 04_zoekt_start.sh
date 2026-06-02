@@ -72,8 +72,8 @@ else
         exit 1
     fi
     
-    # Start the services with the default config
-    sudo docker compose up -d
+    # Start the services with the production port bindings
+    sudo env CADDYFILE=./config/Caddyfile.prod docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 fi
 
 # Check if containers are running
