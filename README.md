@@ -53,7 +53,7 @@ sanchaya-zoekt/
 This application consists of three main components:
 
 1. **zoekt-webserver**: Serves the web interface and handles search queries.
-2. **indexer**: One-time job that clones the Sanchaya repository and indexes all text files.
+2. **indexer**: One-shot job that clones or updates the Sanchaya repository and indexes all text files.
 3. **caddy**: Reverse proxy that provides access to the search interface.
 
 ## Quick Start

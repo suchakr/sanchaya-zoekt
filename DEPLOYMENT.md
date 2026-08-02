@@ -12,6 +12,10 @@ Services:
 Production index and repository data live at
 `/mnt/docker-data/sanchaya-zoekt-data`. Do not use `docker compose down -v`.
 
+The current Azure VM uses a 16 GB `/mnt` data disk. This is below the
+recommended production headroom for Docker layers, the repository, and Zoekt
+shards; monitor it with `06_zoekt_status.sh` and plan a disk expansion.
+
 ## Canonical operating protocol
 
 Use the numbered scripts for normal operation. They hide the difference between
@@ -124,8 +128,8 @@ Do not add `-v`; Caddy's named state and the host index data must survive.
 
 ### 5. Wait for indexing and inspect state
 
-`indexer` may show `Up` while it is working. A successful completion is
-`Exited (0)`.
+When `04_zoekt_start.sh` starts the indexer as a Compose service, it may show
+`Up` while working. A successful completion is `Exited (0)`.
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
@@ -155,13 +159,18 @@ The same information is summarized by:
 ./06_zoekt_status.sh
 ```
 
-Expected steady state:
+For the full `04_zoekt_start.sh` path, expected steady state is:
 
 ```text
 zoekt-caddy       Up
 zoekt-webserver   Up
 indexer           Exited (0)
 ```
+
+For the explicit `run --rm --no-deps indexer` path below, the successful
+indexer container is deliberately removed. In that case, use the command's
+successful return and `06_zoekt_status.sh`'s shard and temporary-file counts as
+the index verification; no indexer container in `ps -a` is expected.
 
 ### 6. Smoke test
 
@@ -189,8 +198,12 @@ sudo env CADDYFILE=./config/Caddyfile.prod \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
-  up -d --build --force-recreate zoekt-webserver caddy
+  up -d --force-recreate zoekt-webserver caddy
 ```
+
+This refreshes the long-running services without rebuilding the Docker image or
+starting a corpus index. Use `./04_zoekt_start.sh --build` when the Dockerfile
+or image dependencies changed.
 
 When the upstream Sanchaya repository changed, run the indexer and then
 restart the webserver:
@@ -211,7 +224,9 @@ sudo env CADDYFILE=./config/Caddyfile.prod \
 ```
 
 The indexer clones or fast-forwards `https://github.com/cahcblr/sanchaya.git`
-and indexes its `main` branch.
+and indexes its `main` branch. A successful run should leave a consistent
+current `sanchaya_v16.*.zoekt` shard set, no `.tmp` files, and enough free
+space for the next refresh.
 
 ## One-time setup on a new VM
 
@@ -246,6 +261,28 @@ disk, run:
 - Indexer exits nonzero: inspect `logs --tail=200 indexer`, disk space, and permissions.
 - Caddy returns `502`: inspect `docker logs zoekt-caddy` and `docker logs zoekt-webserver`.
 - TLS fails: confirm DNS and Azure/VM firewall access to TCP `80` and `443`.
+
+### Disk-full index failure
+
+If the indexer reports `no space left on device`:
+
+1. Confirm the indexer is stopped.
+2. Inspect `sudo docker system df -v` and `sudo df -h /mnt`.
+3. Remove only dangling images with `sudo docker image prune` after reviewing the list.
+4. Remove failed index temporary files only after the indexer is stopped:
+
+   ```bash
+   sudo find /mnt/docker-data/sanchaya-zoekt-data/index \
+     -maxdepth 1 -type f -name '*.tmp' -print -delete
+   ```
+
+5. Rerun the explicit indexer command and require a successful return.
+
+Do not use `docker system prune -a`, `docker volume prune`, or delete the
+entire index directory without reviewing what is being removed. If the index
+directory contains two shard naming groups, inspect them before cleanup; stop
+the webserver before removing an obsolete group. The current VM's 16 GB disk
+should ultimately be expanded rather than managed at this margin.
 
 Stop without deleting data:
 
