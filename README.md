@@ -26,6 +26,7 @@ sanchaya-zoekt/
 ├── 03_zoekt_prep.sh        # Zoekt preparation
 ├── 04_zoekt_start.sh       # Start services
 ├── 05_zoekt_stop.sh        # Stop services
+├── 06_zoekt_status.sh      # Show service and deployment status
 ├── docker-compose.yml              # Main Docker Compose configuration
 ├── docker-compose.override.yml     # linux-specific configuration
 ├── docker-compose.mac.yml          # macOS-specific configuration
@@ -84,7 +85,7 @@ This application consists of three main components:
 3. Start the services:
 
    ```bash
-   ./04_zoekt_start.sh
+   ./04_zoekt_start.sh --build
    ```
 
    This will:
@@ -105,6 +106,15 @@ This application consists of three main components:
    ```bash
    ./05_zoekt_stop.sh
    ```
+
+For routine operation, use `04_zoekt_start.sh` to start, `05_zoekt_stop.sh`
+to stop, and `06_zoekt_status.sh` to inspect Git, containers, storage, and the
+HTTP endpoint. Use `./04_zoekt_start.sh --build` for the first start or after
+Dockerfile/dependency changes. The same commands work on macOS and on the
+Linux production VM; the scripts select the appropriate Compose overlays.
+
+For the Azure production release procedure, including the SSH, Git, Compose,
+indexing, verification, and rollback steps, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## CLI Search (without browser)
 

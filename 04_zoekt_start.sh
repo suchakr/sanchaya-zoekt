@@ -7,6 +7,32 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MAX_RETRIES=10
 RETRY_INTERVAL=5
+cd "$SCRIPT_DIR"
+
+case "$#" in
+    0)
+        BUILD=false
+        ;;
+    1)
+        if [[ "$1" != "--build" ]]; then
+            echo "Usage: $0 [--build]"
+            exit 2
+        fi
+        BUILD=true
+        ;;
+    *)
+        echo "Usage: $0 [--build]"
+        exit 2
+        ;;
+esac
+
+docker_cmd() {
+    if [[ "$(uname)" == "Darwin" ]]; then
+        docker "$@"
+    else
+        sudo docker "$@"
+    fi
+}
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -24,7 +50,7 @@ check_container() {
     echo -n "Waiting for $container_name to start "
     
     while [ $counter -lt $retries ]; do
-        status=$(docker ps --filter "name=^/$container_name$" --format "{{.Status}}" 2>/dev/null)
+        status=$(docker_cmd ps --filter "name=^/$container_name$" --format "{{.Status}}" 2>/dev/null)
         
         if [[ "$status" == *"Up"* ]] && [[ "$status" != *"Restarting"* ]]; then
             echo -e "\n${GREEN}$container_name is running!${NC}"
@@ -42,7 +68,7 @@ check_container() {
     done
     
     # Check one last time
-    status=$(docker ps --filter "name=^/$container_name$" --format "{{.Status}}" 2>/dev/null)
+    status=$(docker_cmd ps --filter "name=^/$container_name$" --format "{{.Status}}" 2>/dev/null)
     if [[ "$status" == *"Up"* ]] && [[ "$status" != *"Restarting"* ]]; then
         echo -e "\n${GREEN}$container_name is running!${NC}"
         return 0
@@ -55,7 +81,7 @@ check_container() {
 # Function to print service status
 print_service_status() {
     echo -e "\n${YELLOW}Service Status:${NC}"
-    docker ps --filter "name=zoekt|caddy" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    docker_cmd ps --filter "name=zoekt|caddy" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 }
 
 echo -e "${YELLOW}Starting Zoekt services...${NC}"
@@ -63,17 +89,40 @@ echo -e "${YELLOW}Starting Zoekt services...${NC}"
 # Check if running on macOS
 if [[ "$(uname)" == "Darwin" ]]; then
     echo "Running on macOS. Using macOS-specific configuration..."
-    # Start services with macOS config
-    docker compose -f docker-compose.yml -f docker-compose.mac.yml up -d
+    compose_files=(
+        -f docker-compose.yml
+        -f docker-compose.mac.yml
+    )
+    docker compose "${compose_files[@]}" config --quiet
+    if [[ "$BUILD" == true ]]; then
+        docker compose "${compose_files[@]}" up -d --build
+    else
+        docker compose "${compose_files[@]}" up -d
+    fi
 else
     # Check if previous stages are complete
     if [ ! -f ./.checkpoints/03_zoekt_prep.done ]; then
         echo "Previous stages not completed. Please run the setup scripts first."
         exit 1
     fi
-    
-    # Start the services with the production port bindings
-    sudo env CADDYFILE=./config/Caddyfile.prod docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+    # The override keeps the index and repository cache on the persistent disk.
+    # The production overlay publishes only the public HTTP/HTTPS ports.
+    compose_files=(
+        -f docker-compose.yml
+        -f docker-compose.override.yml
+        -f docker-compose.prod.yml
+    )
+
+    sudo env CADDYFILE=./config/Caddyfile.prod \
+        docker compose "${compose_files[@]}" config --quiet
+    if [[ "$BUILD" == true ]]; then
+        sudo env CADDYFILE=./config/Caddyfile.prod \
+            docker compose "${compose_files[@]}" up -d --build
+    else
+        sudo env CADDYFILE=./config/Caddyfile.prod \
+            docker compose "${compose_files[@]}" up -d
+    fi
 fi
 
 # Check if containers are running
@@ -90,6 +139,9 @@ done
 if [ "$all_running" = true ]; then
     print_service_status
     echo -e "\n${GREEN}All services are running!${NC}"
+    if [[ "$(uname)" != "Darwin" ]]; then
+        echo "The indexer is a one-shot job; it may remain Up while indexing and should finish with Exited (0)."
+    fi
     echo -e "You can access the web interface at ${YELLOW}http://localhost:6070${NC}"
     echo "To view logs: docker compose logs -f"
 else
