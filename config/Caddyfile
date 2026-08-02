@@ -1,5 +1,21 @@
 :6070 {
-    reverse_proxy zoekt-webserver:6070 {
-        header_up Host {http.request.host}
-    }
+	handle /labs* {
+		root * /srv
+		try_files {path} {path}/ /labs/index.html
+		file_server
+	}
+
+	handle /help* {
+		redir * /?section=help 302
+	}
+
+	handle /about* {
+		redir * /?section=about 302
+	}
+
+	handle {
+		reverse_proxy zoekt-webserver:6070 {
+			header_up Host {http.request.host}
+		}
+	}
 }

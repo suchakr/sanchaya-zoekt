@@ -7,6 +7,7 @@ services:
       - "6070:6070"
     volumes:
       - ${CADDYFILE:-./config/Caddyfile}:/etc/caddy/Caddyfile
+      - ./config/labs:/srv/labs
       - caddy_data:/data
       - caddy_config:/config
     environment:
