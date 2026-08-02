@@ -34,6 +34,38 @@ compose() {
     fi
 }
 
+path_exists() {
+    if [[ "$PLATFORM" == "macOS" ]]; then
+        test -d "$1"
+    else
+        sudo test -d "$1"
+    fi
+}
+
+show_disk_usage() {
+    if [[ "$PLATFORM" == "macOS" ]]; then
+        df -h "$1"
+    else
+        sudo df -h "$1"
+    fi
+}
+
+find_data() {
+    if [[ "$PLATFORM" == "macOS" ]]; then
+        find "$@"
+    else
+        sudo find "$@"
+    fi
+}
+
+show_data_usage() {
+    if [[ "$PLATFORM" == "macOS" ]]; then
+        du -sh "$@"
+    else
+        sudo du -sh "$@"
+    fi
+}
+
 echo "Platform: $PLATFORM"
 echo
 echo "Git:"
@@ -54,8 +86,25 @@ fi
 
 echo
 echo "Data storage:"
-if [[ -d "$data_dir" ]]; then
-    df -h "$data_dir"
+if path_exists "$data_dir"; then
+    show_disk_usage "$data_dir"
+
+    index_dir="$data_dir/index"
+    repos_dir="$data_dir/repos"
+    if path_exists "$index_dir"; then
+        index_shards="$(find_data "$index_dir" -maxdepth 1 -type f -name '*.zoekt' -print | wc -l | tr -d ' ')"
+        index_tmp="$(find_data "$index_dir" -maxdepth 1 -type f -name '*.tmp' -print | wc -l | tr -d ' ')"
+        echo "Index shards: $index_shards"
+        echo "Index temporary files: $index_tmp"
+        show_data_usage "$index_dir"
+    else
+        echo "missing index directory: $index_dir"
+    fi
+    if path_exists "$repos_dir"; then
+        show_data_usage "$repos_dir"
+    else
+        echo "missing repository directory: $repos_dir"
+    fi
 else
     echo "missing: $data_dir"
 fi
