@@ -103,7 +103,11 @@
       return true;
     }
 
+    var searchMode = form.closest(".sanchaya-search-mode");
     var query = input.value.trim();
+    if (searchMode && searchMode.classList.contains("advanced-open") && searchMode.sanchayaGetAdvancedQuery) {
+      query = searchMode.sanchayaGetAdvancedQuery();
+    }
     var valid = searchQueryIsValid(query);
     button.disabled = !valid;
     input.setAttribute("aria-invalid", valid ? "false" : "true");
@@ -124,6 +128,9 @@
       input.addEventListener("input", function() {
         updateForm(form, false);
       });
+      form.sanchayaRefreshSearchGuard = function(showMessage) {
+        return updateForm(form, !!showMessage);
+      };
       form.addEventListener("submit", function(event) {
         if (!updateForm(form, true)) {
           event.preventDefault();

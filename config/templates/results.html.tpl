@@ -24,9 +24,9 @@
       <thead>
         <tr>
           <th colspan="2">
-            {{if .URL}}<a name="{{.ResultID}}" class="result"></a><a href="{{.URL}}" >{{else}}<a name="{{.ResultID}}">{{end}}
+            {{if .URL}}<a name="{{.ResultID}}" class="result"></a><a href="{{.URL}}" title="{{.Repo}}:{{.FileName}}">{{else}}<a name="{{.ResultID}}">{{end}}
             <small>
-              {{.Repo}}:{{.FileName}} {{if .ScoreDebug}}<i>({{.ScoreDebug}})</i>{{end}}</a>:
+              {{if eq .Repo "github.com/cahcblr/sanchaya"}}{{.FileName}}{{else}}{{.Repo}}:{{.FileName}}{{end}} {{if .ScoreDebug}}<i>({{.ScoreDebug}})</i>{{end}}</a>:
               <span style="font-weight: normal">[ {{if .Branches}}{{range .Branches}}<span class="label label-default">{{.}}</span>,{{end}}{{end}} ]</span>
               {{if .Language}}<button
                    title="restrict search to files written in {{.Language}}"

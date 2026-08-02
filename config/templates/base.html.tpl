@@ -142,6 +142,7 @@
     }
   </style>
   {{template "searchGuardAssets"}}
+  {{template "advancedSearchAssets"}}
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -186,7 +187,7 @@
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           {{ if .Version }}<li><a href="/">Search</a></li>{{ end }}
-          {{ if .Version }}<li><a href="/about">About</a></li>{{ end }}
+          {{ if .Version }}<li><a href="/labs/">Labs</a></li>{{ end }}
           {{ if .Debug }}<li><a href="/debug">Debug</a></li>{{ end }}
         </ul>
       </div>

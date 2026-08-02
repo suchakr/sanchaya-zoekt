@@ -25,23 +25,125 @@
 <style>
   /* Base template styles */
   .zoekt-h1 {
-    color: #FF0000;  /* Changed to bright red for testing */
+    color: #222;
     font-family: 'Arial Unicode MS', 'Marathi Harsh', serif;
-    font-size: 32px; /* Made larger for testing */
+    font-size: 24px;
   }
   
   /* Add Sanchaya branding styles */
   .sanchaya-brand {
-    font-size: 28px; /* Made larger for testing */
+    font-size: 22px;
     margin-right: 10px;
-    color: #0000FF; /* Changed to blue for testing */
+    color: #7b2626;
     font-weight: bold;
     font-family: 'Arial Unicode MS', 'Nirmala UI', serif;
   }
   
-  #navsearchbox { width: 350px !important; }
+  #navsearchbox { font-size: 16px; height: 38px; width: 100% !important; }
+  .navbar .sanchaya-basic-option { display: none; }
   #maxhits { width: 100px !important; }
   #context { width: 70px !important; }
+  .sanchaya-utility-nav {
+    align-items: center;
+    display: flex;
+    gap: 2px;
+  }
+  .sanchaya-utility-nav > li > a {
+    color: #555;
+    min-width: 34px;
+    padding-left: 9px;
+    padding-right: 9px;
+    text-align: center;
+  }
+  .sanchaya-labs-icon {
+    fill: none;
+    height: 18px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+    vertical-align: -4px;
+    width: 18px;
+  }
+  .sanchaya-home-shell {
+    margin: 0 auto;
+    max-width: 980px;
+    padding: 18px 20px 24px;
+  }
+  .sanchaya-home-head {
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 9px;
+  }
+  .sanchaya-home-head .sanchaya-brand {
+    text-decoration: none;
+  }
+  .sanchaya-home-head .sanchaya-utility-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sanchaya-home-head .sanchaya-utility-nav > li {
+    display: block;
+  }
+  .sanchaya-home-head .sanchaya-utility-nav > li > a {
+    display: block;
+    line-height: 30px;
+  }
+  .sanchaya-home-stats {
+    color: #777;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .sanchaya-home-info {
+    border-top: 1px solid #ddd;
+    margin-top: 18px;
+    padding-top: 10px;
+  }
+  .sanchaya-home-info > details > summary {
+    color: #555;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    list-style-position: inside;
+    outline: none;
+  }
+  .sanchaya-home-info > details > summary:focus-visible {
+    outline: 2px solid #66afe9;
+    outline-offset: 2px;
+  }
+  .sanchaya-home-info-body {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1.25fr) minmax(220px, .75fr);
+    margin-top: 12px;
+  }
+  .sanchaya-home-info-body h2 {
+    border-top: 1px solid #e4e4e4;
+    font-size: 15px;
+    margin: 0 0 8px;
+    padding-top: 10px;
+  }
+  .sanchaya-home-info-body dl {
+    display: grid;
+    grid-template-columns: minmax(115px, 1fr) minmax(0, 1.4fr);
+    margin: 0;
+  }
+  .sanchaya-home-info-body dt,
+  .sanchaya-home-info-body dd {
+    border-bottom: 1px solid #eee;
+    margin: 0;
+    padding: 5px 0;
+  }
+  .sanchaya-home-info-body dt { font-weight: 400; }
+  .sanchaya-home-info-body dd { padding-left: 10px; }
+  .sanchaya-home-info-body code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
   .label-dup {
     border-width: 1px !important;
     border-style: solid !important;
@@ -74,7 +176,60 @@
   }
   :target { background-color: #ccf; }
   table tbody tr td { border: none !important; padding: 2px !important; }
+  @media (max-width: 760px) {
+    #navsearchbox { width: 100% !important; }
+    .navbar #navbar-collapse.navbar-collapse.collapse {
+      border-top: 0;
+      box-shadow: none;
+      display: block !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+    #navbar-collapse .sanchaya-utility-nav {
+      display: none;
+    }
+    #navbar-collapse.in .sanchaya-utility-nav {
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 3px 8px rgba(0,0,0,.1);
+      display: flex;
+      margin: 0;
+      padding: 0 3px;
+      position: absolute;
+      right: 10px;
+      top: 48px;
+      z-index: 4100;
+    }
+    #navbar-collapse.in .sanchaya-utility-nav > li {
+      float: none;
+    }
+    #navbar-collapse.in .sanchaya-utility-nav > li > a {
+      padding: 8px 12px;
+    }
+    .sanchaya-home-shell {
+      padding: 10px 12px 18px;
+    }
+    .sanchaya-home-info-body {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .sanchaya-home-info-body dl {
+      grid-template-columns: minmax(100px, .8fr) minmax(0, 1.2fr);
+    }
+  }
+  @media (min-width: 761px) {
+    .navbar .navbar-collapse {
+      position: relative;
+    }
+    .navbar .sanchaya-utility-nav {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 2;
+    }
+  }
 </style>
 {{template "searchGuardAssets"}}
+{{template "advancedSearchAssets"}}
 </head>
   
