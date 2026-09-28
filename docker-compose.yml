@@ -21,7 +21,9 @@ services:
       dockerfile: Dockerfile
     image: sanchaya-zoekt-web
     container_name: zoekt-webserver
-    command: ["zoekt-webserver", "-listen", "0.0.0.0:6070", "-index", "/data/index", "-template_dir", "/app/config/templates"]
+    # RPC is consumed by the private retrieval companion.  Caddy controls
+    # public exposure; the production Caddyfile denies /api/*.
+    command: ["zoekt-webserver", "-listen", "0.0.0.0:6070", "-index", "/data/index", "-template_dir", "/app/config/templates", "-rpc"]
     volumes:
       - ./data/index:/data/index
       - ./config/templates:/app/config/templates

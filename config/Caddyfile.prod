@@ -13,6 +13,12 @@
         redir * /?section=about 302
     }
 
+    # Zoekt JSON RPC is for the private retrieval companion.  Do not expose
+    # it through the public :6070 listener.
+    handle /api* {
+        respond 404
+    }
+
     handle {
         reverse_proxy zoekt-webserver:6070 {
             header_up Host {http.request.host}
@@ -39,6 +45,23 @@ sanchaya.rasowshi.us {
 
     handle /about* {
         redir * /?section=about 302
+    }
+
+    # MCP is the only new public API surface.  The MCP service validates the
+    # bearer token; Caddy supplies TLS and routes the request over the shared
+    # Docker network.
+    handle /mcp* {
+        reverse_proxy retrieval-mcp:8787 {
+            header_up Host {http.request.host}
+            header_up X-Real-IP {http.request.remote}
+            header_up X-Forwarded-For {http.request.remote}
+            header_up X-Forwarded-Proto {http.request.scheme}
+        }
+    }
+
+    # Keep raw Zoekt RPC private to the Docker network.
+    handle /api* {
+        respond 404
     }
 
     handle {
