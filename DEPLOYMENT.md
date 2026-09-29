@@ -1,101 +1,75 @@
-# Production Deployment Runbook
+# Production deployment runbook
 
-This runbook deploys the `feat/google-analytics` branch to the Azure VM serving
-`https://sanchaya.rasowshi.us`.
+This runbook operates the Azure VM serving `https://sanchaya.rasowshi.us`.
+The normal production checkout is `~/sg/sanchaya-zoekt`.
 
-Services:
+## Production contract
 
-- `zoekt-caddy`: public HTTP/HTTPS entry point and static Labs files.
-- `zoekt-webserver`: the long-running search application.
-- `indexer`: a one-shot job that updates the Sanchaya checkout and builds the Zoekt index.
+- `zoekt-caddy` is the only public entry point on ports 80 and 443.
+- `zoekt-webserver` serves the UI and private RPC on the Docker network.
+- `indexer` is a one-shot corpus refresh and shard build.
+- Persistent repositories and shards live under
+  `/mnt/docker-data/sanchaya-zoekt-data`.
+- The Patra Darpan retrieval project joins `sanchaya-zoekt_default`; this
+  repository does not build or own Qdrant, retrieval releases, or MCP code.
+- Never use `docker compose down -v` during normal deployment.
 
-Production index and repository data live at
-`/mnt/docker-data/sanchaya-zoekt-data`. Do not use `docker compose down -v`.
+The current VM has a small data disk. Run `06_zoekt_status.sh` and inspect free
+space before image builds or corpus reindexing.
 
-The current Azure VM uses a 16 GB `/mnt` data disk. This is below the
-recommended production headroom for Docker layers, the repository, and Zoekt
-shards; monitor it with `06_zoekt_status.sh` and plan a disk expansion.
+## Canonical workflow
 
-## Canonical operating protocol
+The numbered scripts hide platform-specific Compose overlays and data paths.
 
-Use the numbered scripts for normal operation. They hide the difference between
-local macOS storage and the production Linux Compose overlays.
-
-Local development:
+Development:
 
 ```bash
-./04_zoekt_start.sh --build  # first start or Dockerfile/dependency changes
-# develop and test
+./04_zoekt_start.sh --build
 ./06_zoekt_status.sh
 ./05_zoekt_stop.sh
 ```
 
-Remote release:
+Production release:
 
 ```bash
 git push origin feat/google-analytics
 ssh sanchaya.rasowshi.us
 cd ~/sg/sanchaya-zoekt
+git status --short --branch
 git pull --ff-only origin feat/google-analytics
 ./04_zoekt_start.sh
 ./06_zoekt_status.sh
 ```
 
-Use `./04_zoekt_start.sh --build` on the VM when the pulled change modifies
-the Dockerfile or image dependencies.
+Use `./04_zoekt_start.sh --build` only when the Dockerfile or image dependencies
+changed. Do not stop the service before an ordinary release; the start script
+reconciles the running project. `05_zoekt_stop.sh` is for deliberate shutdown
+or maintenance.
 
-Do not stop the remote service before an ordinary release. `04_zoekt_start.sh`
-reconciles the running services with the pulled checkout. Use `05_zoekt_stop.sh`
-only for intentional shutdown or maintenance. `06_zoekt_status.sh` is read-only.
+## Choose the correct update path
 
-## Normal release
+### Template or long-running service change
 
-### 1. Push from the development machine
-
-```bash
-cd /Users/sunder/projects/sanchaya-zoekt
-git status --short --branch
-git diff --check
-git push origin feat/google-analytics
-git log -1 --oneline
-```
-
-Do not continue until the push succeeds.
-
-### 2. Connect to the VM
-
-The SSH entry for this machine maps the host to user `kumars` and
-`~/.ssh/id_ed25519`:
+For templates or service configuration that does not affect indexed content,
+recreate only the long-running services:
 
 ```bash
-ssh sanchaya.rasowshi.us
+sudo env CADDYFILE=./config/Caddyfile.prod \
+  docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.override.yml \
+  -f docker-compose.prod.yml \
+  up -d --no-deps --force-recreate zoekt-webserver caddy
+
+./06_zoekt_status.sh
 ```
 
-Equivalent explicit form:
+If the Dockerfile or compiled Zoekt binary changed, use
+`./04_zoekt_start.sh --build` instead.
 
-```bash
-ssh -i ~/.ssh/id_ed25519 kumars@sanchaya.rasowshi.us
-```
+### Caddy-only route change
 
-### 3. Update the VM checkout
-
-```bash
-cd ~/sg/sanchaya-zoekt
-git status --short --branch
-git branch --show-current
-git pull --ff-only origin feat/google-analytics
-git log -1 --oneline
-grep '^FROM ' Dockerfile
-```
-
-The current Docker base image is `golang:1.25.12-bookworm`. If the `FROM` line
-shows an unavailable tag, stop before building. The failed deployment used
-`golang:1.25.9-bullseye`, which does not exist.
-
-### 4. Validate and deploy
-
-Run from the repository root. The persistent-data override is required in
-production; the production overlay publishes ports `80` and `443`.
+Validate the source configuration, then recreate only Caddy:
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
@@ -104,109 +78,21 @@ sudo env CADDYFILE=./config/Caddyfile.prod \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
   config --quiet
-```
 
-The numbered script is the normal deployment entry point:
-
-```bash
-./04_zoekt_start.sh
-```
-
-It validates the Compose configuration and runs the equivalent of:
-
-```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
   docker compose \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
-  up -d
+  up -d --no-deps --force-recreate caddy
 ```
 
-Pass `--build` to the script when the Dockerfile or image dependencies changed.
-Do not add `-v`; Caddy's named state and the host index data must survive.
+A Caddy-only change does not require a Zoekt reindex or retrieval vector
+rebuild.
 
-### 5. Wait for indexing and inspect state
+### Sanchaya corpus refresh
 
-When `04_zoekt_start.sh` starts the indexer as a Compose service, it may show
-`Up` while working. A successful completion is `Exited (0)`.
-
-```bash
-sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
-  -f docker-compose.yml \
-  -f docker-compose.override.yml \
-  -f docker-compose.prod.yml \
-  ps -a
-```
-
-To follow the indexer:
-
-```bash
-sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
-  -f docker-compose.yml \
-  -f docker-compose.override.yml \
-  -f docker-compose.prod.yml \
-  logs --tail=100 -f indexer
-```
-
-Press `Ctrl-C` only stops log following; it does not stop the container.
-
-The same information is summarized by:
-
-```bash
-./06_zoekt_status.sh
-```
-
-For the full `04_zoekt_start.sh` path, expected steady state is:
-
-```text
-zoekt-caddy       Up
-zoekt-webserver   Up
-indexer           Exited (0)
-```
-
-For the explicit `run --rm --no-deps indexer` path below, the successful
-indexer container is deliberately removed. In that case, use the command's
-successful return and `06_zoekt_status.sh`'s shard and temporary-file counts as
-the index verification; no indexer container in `ps -a` is expected.
-
-### 6. Smoke test
-
-```bash
-curl -sS -o /dev/null -w 'HTTP  %{http_code}  %{url_effective}\n' \
-  http://sanchaya.rasowshi.us/
-curl -sS -o /dev/null -w 'HTTPS %{http_code}  %{url_effective}\n' \
-  https://sanchaya.rasowshi.us/
-curl -sS -o /dev/null -w 'SEARCH %{http_code}  %{url_effective}\n' \
-  'https://sanchaya.rasowshi.us/search?q=%E0%A4%A4%E0%A4%BF%E0%A4%AE%E0%A4%BF%E0%A4%B0%E0%A4%BE'
-```
-
-HTTP should redirect to HTTPS. The HTTPS and search requests should return
-`200`. In a browser also check home, normal search, the one-character guard,
-advanced search, IAST, history, Labs, and `/labs/`.
-
-## App release versus corpus refresh
-
-For HTML, CSS, Caddy, or application-code changes, the indexer need not run.
-Use the same Compose files and target only the long-running services:
-
-```bash
-sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
-  -f docker-compose.yml \
-  -f docker-compose.override.yml \
-  -f docker-compose.prod.yml \
-  up -d --force-recreate zoekt-webserver caddy
-```
-
-This refreshes the long-running services without rebuilding the Docker image or
-starting a corpus index. Use `./04_zoekt_start.sh --build` when the Dockerfile
-or image dependencies changed.
-
-When the upstream Sanchaya repository changed, run the indexer and then
-restart the webserver:
+Run the one-shot indexer and restart the webserver after success:
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
@@ -215,97 +101,125 @@ sudo env CADDYFILE=./config/Caddyfile.prod \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
   run --rm --no-deps indexer
+
 sudo env CADDYFILE=./config/Caddyfile.prod \
   docker compose \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
   restart zoekt-webserver
+
+./06_zoekt_status.sh
 ```
 
 The indexer clones or fast-forwards `https://github.com/cahcblr/sanchaya.git`
-and indexes its `main` branch. A successful run should leave a consistent
-current `sanchaya_v16.*.zoekt` shard set, no `.tmp` files, and enough free
-space for the next refresh.
+and indexes `main`. Success requires a zero exit status, a consistent current
+shard set, and no temporary index files.
 
-## One-time setup on a new VM
+### Patra Darpan retrieval or MCP change
 
-The existing Azure VM is already prepared. For a new VM:
+Deploy the Patra Darpan project from its own checkout and Makefile. Recreate
+Sanchaya Caddy only when `config/Caddyfile.prod` changed. Do not run the Zoekt
+indexer merely because MCP, OAuth, Qdrant, or retrieval code changed.
 
-```bash
-git clone https://github.com/suchakr/sanchaya-zoekt.git ~/sg/sanchaya-zoekt
-cd ~/sg/sanchaya-zoekt
-git switch feat/google-analytics
-chmod +x *.sh
-./01_docker_install.sh
-lsblk
-df -h
-```
+## Verification
 
-`02_disk_setup.sh` assumes `/dev/sdb` is the intended empty disk and can
-format it. Never run it blindly on an existing server. After confirming the
-disk, run:
+Start with:
 
 ```bash
-./02_disk_setup.sh
-./03_zoekt_prep.sh
-./04_zoekt_start.sh
+./06_zoekt_status.sh
 ```
+
+Expected long-running services:
+
+```text
+zoekt-caddy      Up
+zoekt-webserver  Up
+```
+
+An indexer launched by the normal start path should finish as `Exited (0)`. An
+indexer launched with `run --rm` disappears after successful completion.
+
+Verify the public surface:
+
+```bash
+curl -sS -o /dev/null -w 'UI %{http_code}\n' \
+  https://sanchaya.rasowshi.us/
+
+curl -sS -o /dev/null -w 'SEARCH %{http_code}\n' \
+  'https://sanchaya.rasowshi.us/search?q=%E0%A4%A4%E0%A4%BF%E0%A4%AE%E0%A4%BF%E0%A4%B0%E0%A4%BE'
+
+curl -sS -o /dev/null -w 'API %{http_code}\n' \
+  https://sanchaya.rasowshi.us/api/search
+```
+
+UI and search should return `200`; public API should return `404`.
+
+When Patra Darpan retrieval is deployed, additionally verify:
+
+- the OAuth discovery document is valid;
+- unauthenticated `/mcp` returns `401`;
+- an allowlisted client can initialize MCP and call a tool; and
+- Patra Darpan backend smoke checks reach private Zoekt RPC.
+
+## New VM setup
+
+1. Clone the repository to `~/sg/sanchaya-zoekt`.
+2. Run `01_docker_install.sh`.
+3. Attach and prepare persistent storage with `02_disk_setup.sh`.
+4. Run `03_zoekt_prep.sh`.
+5. Confirm DNS and inbound ports 80/443.
+6. Run `04_zoekt_start.sh --build`.
+7. Wait for the indexer and run `06_zoekt_status.sh` plus the smoke checks.
+
+The Patra Darpan companion is deployed separately after the
+`sanchaya-zoekt_default` network exists.
 
 ## Troubleshooting
 
-- Build says a Go image is not found: pull the branch and inspect `FROM`.
-- Status says Docker is inaccessible: start Docker Desktop locally, or use the
-  configured `sudo docker` access on the VM.
-- Webserver has an old creation time: rerun `up -d --build --force-recreate zoekt-webserver`.
-- Indexer exits nonzero: inspect `logs --tail=200 indexer`, disk space, and permissions.
-- Caddy returns `502`: inspect `docker logs zoekt-caddy` and `docker logs zoekt-webserver`.
-- TLS fails: confirm DNS and Azure/VM firewall access to TCP `80` and `443`.
+### Caddy returns 502
 
-### Disk-full index failure
-
-If the indexer reports `no space left on device`:
-
-1. Confirm the indexer is stopped.
-2. Inspect `sudo docker system df -v` and `sudo df -h /mnt`.
-3. Remove only dangling images with `sudo docker image prune` after reviewing the list.
-4. Remove failed index temporary files only after the indexer is stopped:
-
-   ```bash
-   sudo find /mnt/docker-data/sanchaya-zoekt-data/index \
-     -maxdepth 1 -type f -name '*.tmp' -print -delete
-   ```
-
-5. Rerun the explicit indexer command and require a successful return.
-
-Do not use `docker system prune -a`, `docker volume prune`, or delete the
-entire index directory without reviewing what is being removed. If the index
-directory contains two shard naming groups, inspect them before cleanup; stop
-the webserver before removing an obsolete group. The current VM's 16 GB disk
-should ultimately be expanded rather than managed at this margin.
-
-Stop without deleting data:
+Inspect both the gateway and the intended upstream:
 
 ```bash
-./05_zoekt_stop.sh
+docker logs zoekt-caddy
+docker logs zoekt-webserver
+docker network inspect sanchaya-zoekt_default
 ```
 
-## Emergency rollback
+For `/mcp`, confirm the Patra Darpan OAuth MCP container is attached to the
+network. For the search UI, confirm `zoekt-webserver` is healthy.
 
-Use a known-good commit without rewriting the remote branch:
+### Indexer fails for disk space
+
+Stop before deleting data. Inspect:
 
 ```bash
-cd ~/sg/sanchaya-zoekt
-git switch --detach <known-good-commit>
-./04_zoekt_start.sh
+./06_zoekt_status.sh
+docker system df
+df -h /mnt
 ```
 
-Afterward return the VM to the deployment branch:
+Builder-cache cleanup may be safe after inspection. Do not broadly prune
+images, remove volumes, or delete the current shard set without a specific
+recovery plan.
 
-```bash
-git switch feat/google-analytics
-git pull --ff-only origin feat/google-analytics
-```
+### Indexer fails after writing temporary shards
 
-The production Caddy configuration is intentionally independent of the old
-Sourcegraph experiment.
+Keep the last known-good shards until the failure is understood. Confirm the
+indexer exit status and temporary-file count. Remove only identified failed
+temporary artifacts, then rerun the one-shot indexer.
+
+## Rollback
+
+1. Identify the last reviewed Sanchaya-Zoekt commit.
+2. Move the production checkout to that commit or branch using a non-destructive
+   Git operation appropriate to the incident.
+3. Recreate only affected long-running services.
+4. Reindex only if the rollback changes indexer behavior or the intended
+   Sanchaya revision.
+5. Run status and public smoke checks.
+
+Rollback of Patra Darpan retrieval is handled in its repository. The two
+projects share a network contract but retain independent source and release
+lifecycles.
