@@ -124,6 +124,9 @@ Caddy deliberately blocks public `/api/*` access.
 | Production procedure | `DEPLOYMENT.md` |
 | Current repository and shard state | `06_zoekt_status.sh` |
 
-## Content rights
+## Licence and content rights
 
-Corpus rights remain with their respective sources.
+Project-owned code and documentation are licensed under the [MIT License](LICENSE).
+Upstream Zoekt, Caddy, and other third-party components retain their own licences.
+Corpus rights remain with their respective sources; the code licence does not
+relicense indexed texts or papers.

@@ -29,14 +29,20 @@ Development:
 ./05_zoekt_stop.sh
 ```
 
+Production releases use `main`. Existing hosts on `feat/google-analytics`
+can switch to `main` after confirming the checkout has no tracked changes.
+Changing the checkout alone does not recreate services or rebuild indexes.
+
 Production release:
 
 ```bash
-git push origin feat/google-analytics
+git push origin main
 ssh sanchaya.rasowshi.us
 cd ~/sg/sanchaya-zoekt
 git status --short --branch
-git pull --ff-only origin feat/google-analytics
+git fetch origin
+git switch main
+git pull --ff-only origin main
 ./04_zoekt_start.sh
 ./06_zoekt_status.sh
 ```
