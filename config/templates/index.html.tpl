@@ -1,8 +1,8 @@
 {{define "body"}}
 <div class="banner" style="background-color: #FFFF00; padding: 15px; margin-bottom: 20px;">
-  <h1 class="zoekt-h1"><span class="sanchaya-brand">सञ्चयः</span> Search - TEST CHANGE</h1>
+  <h1 class="zoekt-h1"><span class="sanchaya-brand">सञ्चयः</span> Search</h1>
 </div>
-<form action="search">
+<form action="search" data-sanchaya-search-form>
 <div class="input-group input-group-lg">
   {{if .Last}}
   <input class="form-control" placeholder="Search for something, regexp allowed." autofocus {{if .AutoFocus}}autofocus{{end}}
@@ -15,6 +15,7 @@
     <button class="btn btn-primary">Search</button>
   </span>
 </div><!-- /input-group -->
+<p class="help-block sanchaya-search-guard" aria-live="polite"></p>
 <div class="checkbox">
   <label title="Regular expression search is more powerful, but may be slower.">
     <input name="regexp" {{if .PatternType }}checked{{end}}

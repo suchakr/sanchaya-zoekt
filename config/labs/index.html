@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Labs - Sanchaya Search</title>
+  <style>
+    :root {
+      --border: #d6d6d6;
+      --muted: #666;
+      --text: #222;
+      --accent: #2b5c88;
+      --soft: #f7f7f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: #fff;
+      color: var(--text);
+      font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap {
+      margin: 0 auto;
+      max-width: 980px;
+      padding: 18px 20px 0;
+    }
+    .site-header {
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 9px;
+    }
+    .brand {
+      color: #7b2626;
+      font-family: "Arial Unicode MS", "Nirmala UI", serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .site-nav {
+      align-items: center;
+      display: flex;
+      gap: 4px;
+    }
+    .site-nav a {
+      align-items: center;
+      color: #555;
+      display: inline-flex;
+      min-height: 30px;
+      min-width: 34px;
+      justify-content: center;
+    }
+    .site-nav a.active { color: var(--accent); }
+    .labs-icon {
+      fill: none;
+      height: 20px;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+      width: 20px;
+    }
+    .intro {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0 16px;
+    }
+    h1 {
+      align-items: center;
+      display: flex;
+      font-size: 20px;
+      font-weight: 600;
+      gap: 8px;
+      margin: 0;
+    }
+    h2 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+    .intro p {
+      color: var(--muted);
+      margin: 6px 0 0;
+      max-width: 640px;
+    }
+    .section {
+      border-bottom: 1px solid var(--border);
+      padding: 17px 0;
+    }
+    .lab-entry {
+      border-top: 1px solid #e6e6e6;
+      padding: 12px 0 2px;
+    }
+    .entry-head {
+      align-items: baseline;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .entry-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .status {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .lab-entry p {
+      margin: 5px 0 10px;
+      max-width: 720px;
+    }
+    .entry-link {
+      background: var(--soft);
+      border: 1px solid #cfcfcf;
+      border-radius: 2px;
+      display: inline-block;
+      padding: 5px 8px;
+    }
+    .entry-link:hover {
+      background: #eee;
+      text-decoration: none;
+    }
+    .muted { color: var(--muted); }
+    .site-footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      margin-top: 28px;
+      padding: 12px 0 18px;
+    }
+    .site-footer a { color: inherit; }
+    @media (max-width: 560px) {
+      .wrap { padding: 10px 12px 0; }
+      .intro { padding-top: 16px; }
+      .entry-head { gap: 4px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="site-header">
+      <a class="brand" href="/" title="New search">सञ्चयः</a>
+      <nav class="site-nav" aria-label="Site links">
+        <a href="/" title="Search" aria-label="Search">Search</a>
+        <a class="active" href="/labs/" title="Labs" aria-label="Labs" aria-current="page">
+          <svg class="labs-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 2h6"></path>
+            <path d="M10 2v7.5L4 19a2 2 0 0 0 1.7 3h12.6A2 2 0 0 0 20 19l-6-9.5V2"></path>
+            <path d="M6.4 16h11.2"></path>
+            <path d="M8 18.5h.01"></path>
+          </svg>
+        </a>
+      </nav>
+    </header>
+
+    <section class="intro">
+      <h1>
+        <svg class="labs-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6"></path>
+          <path d="M10 2v7.5L4 19a2 2 0 0 0 1.7 3h12.6A2 2 0 0 0 20 19l-6-9.5V2"></path>
+          <path d="M6.4 16h11.2"></path>
+          <path d="M8 18.5h.01"></path>
+        </svg>
+        Labs
+      </h1>
+      <p>Small experiments for search and language tooling. Successful experiments may be promoted into the main experience.</p>
+    </section>
+
+    <section class="section">
+      <h2>Promoted</h2>
+      <article class="lab-entry">
+        <div class="entry-head">
+          <div class="entry-title">Query Builder</div>
+          <div class="status">Promoted to Advanced Search</div>
+        </div>
+        <p>Build Find, Without, IAST, scope, matching options, result limits, and context into a generated Zoekt query.</p>
+        <a class="entry-link" href="/?adv=1">Try Advanced Search &rarr;</a>
+      </article>
+    </section>
+
+    <section class="section">
+      <h2>Future experiments</h2>
+      <p class="muted">New experiments will appear here.</p>
+    </section>
+
+    <footer class="site-footer">
+      <a href="https://cahc.jainuniversity.ac.in/search">CAHC</a>
+    </footer>
+  </main>
+</body>
+</html>

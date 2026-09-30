@@ -1,96 +1,90 @@
-
 <html>
 {{template "head"}}
 <title>सञ्चयः (Sanchaya) Search</title>
-<body>
-  <div class="jumbotron" style="background-color: #f5f5f5;">
-    <div class="container">
-      <h1 class="zoekt-h1"><span class="sanchaya-brand">सञ्चयः</span> <span style="font-size: 24px;">Search</span></h1>
-      {{template "searchbox" .Last}}
-    </div>
-  </div>
+<body id="home">
+  <main class="sanchaya-home-shell">
+    <header class="sanchaya-home-head">
+      <a class="sanchaya-brand" href="/" title="New search">सञ्चयः</a>
+      <ul class="sanchaya-utility-nav" aria-label="Site links">
+        <li><a href="/labs/" title="Labs" aria-label="Labs"><svg class="sanchaya-labs-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6"></path><path d="M10 2v7.5L4 19a2 2 0 0 0 1.7 3h12.6A2 2 0 0 0 20 19l-6-9.5V2"></path><path d="M6.4 16h11.2"></path><path d="M8 18.5h.01"></path></svg><span class="sr-only">Labs</span></a></li>
+      </ul>
+    </header>
 
-  <div class="container">
-    <div class="row">
-      <div class="col-md-8">
-        <h3>Search examples:</h3>
-        <dl class="dl-horizontal">
-          <dt><a href="search?q=तपःस्वाध्यायनिरतं">तपःस्वाध्यायनिरतं</a></dt><dd>search for "तपःस्वाध्यायनिरतं" or similar words</dd>
-          <dt><a href="search?q=%22%E0%A4%A4%E0%A4%BF%E0%A4%AE%E0%A4%BF%E0%A4%B0%E0%A4%BE+%E0%A4%AA%E0%A4%B9%E0%A4%83%22">"तिमिरा पहः"</a></dt><dd>search for the exact phrase "तिमिरा पहः"</dd>
-          <dt><a href="search?q=%E0%AE%85%E0%AE%AE%E0%AF%8D+%E0%AE%95%E0%AE%AF%E0%AE%B2%E0%AF%8D+%E0%AE%AA%E0%AE%BE%E0%AE%AF%E0%AF%8D">அம் கயல் பாய்</a></dt><dd>search for texts containing "அம் கயல் பாய்" (Tamil text)</dd>
-          <dt><a href="search?q=सर्वेश्वरेश्वरः कृष्णः">सर्वेश्वरेश्वरः कृष्णः</a></dt><dd>search for texts containing both "सर्वेश्वरेश्वरः" and "कृष्णः"</dd>
-          <dt><a href="search?q=%E0%A4%A4%E0%A4%BF%E0%A4%AE%E0%A4%BF%E0%A4%B0%E0%A4%BE+file%3APur">तिमिरा file:Pur</a></dt><dd>search for "तिमिरा" in files containing "Pur" in their path</dd>
-        </dl>
-        
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" href="#advancedExamples">Show Advanced Search Options</a>
-            </h4>
-          </div>
-          <div id="advancedExamples" class="panel-collapse collapse">
-            <div class="panel-body">
-              <h4>Advanced search examples:</h4>
-              <dl class="dl-horizontal">
-                <dt><a href="search?q=needle">needle</a></dt><dd>search for "needle"</dd>
-                <dt><a href="search?q=thread+or+needle">thread or needle</a></dt><dd>search for either "thread" or "needle"</dd>
-                <dt><a href="search?q=class+needle">class needle</a></span></dt><dd>search for files containing both "class" and "needle"</dd>
-                <dt><a href="search?q=class+Needle">class Needle</a></dt><dd>search for files containing both "class" (case insensitive) and "Needle" (case sensitive)</dd>
-                <dt><a href="search?q=class+Needle+case:yes">class Needle case:yes</a></dt><dd>search for files containing "class" and "Needle", both case sensitively</dd>
-                <dt><a href="search?q=%22class Needle%22">"class Needle"</a></dt><dd>search for files with the phrase "class Needle"</dd>
-                <dt><a href="search?q=needle+-hay">needle -hay</a></dt><dd>search for files with the word "needle" but not the word "hay"</dd>
-                <dt><a href="search?q=path+file:java">path file:java</a></dt><dd>search for the word "path" in files whose name contains "java"</dd>
-                <dt><a href="search?q=needle+lang%3Apython&num=50">needle lang:python</a></dt><dd>search for "needle" in Python source code</dd>
-                <dt><a href="search?q=f:%5C.c%24">f:\.c$</a></dt><dd>search for files whose name ends with ".c"</dd>
-                <dt><a href="search?q=path+-file:java">path -file:java</a></dt><dd>search for the word "path" excluding files whose name contains "java"</dd>
-                <dt><a href="search?q=foo.*bar">foo.*bar</a></dt><dd>search for the regular expression "foo.*bar"</dd>
-                <dt><a href="search?q=-%28Path File%29 Stream">-(Path File) Stream</a></dt><dd>search "Stream", but exclude files containing both "Path" and "File"</dd>
-                <dt><a href="search?q=-Path%5c+file+Stream">-Path\ file Stream</a></dt><dd>search "Stream", but exclude files containing "Path File"</dd>
-                <dt><a href="search?q=sym:data">sym:data</a></span></dt><dd>search for symbol definitions containing "data"</dd>
-                <dt><a href="search?q=phone+r:droid">phone r:droid</a></dt><dd>search for "phone" in repositories whose name contains "droid"</dd>
-              </dl>
+    {{template "searchbox" .Last}}
 
-              <h4>To list repositories, try:</h4>
-              <dl class="dl-horizontal">
-                <dt><a href="search?q=r:droid">r:droid</a></dt><dd>list repositories whose name contains "droid".</dd>
-                <dt><a href="search?q=r:go+-r:google">r:go -r:google</a></dt><dd>list repositories whose name contains "go" but not "google".</dd>
-              </dl>
-            </div>
-          </div>
+    <p class="sanchaya-home-stats">
+      {{.Stats.Documents}} documents · {{.Stats.Repos}} repositories · {{HumanUnit .Stats.ContentBytes}}B searchable text
+    </p>
+
+    <section class="sanchaya-home-info" aria-label="Help and About">
+      <details id="sanchaya-home-info-details">
+        <summary><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Help &amp; About</summary>
+        <div class="sanchaya-home-info-body">
+          <section id="sanchaya-home-help">
+            <h2>Help</h2>
+            <dl>
+              <dt><a href="/search?q=तपःस्वाध्यायनिरतं">तपःस्वाध्यायनिरतं</a></dt>
+              <dd>Find the term across all indexed texts.</dd>
+              <dt><a href="/search?q=तिमिरा+file%3APur">तिमिरा file:Pur</a></dt>
+              <dd>Restrict matches to paths containing <code>Pur</code>.</dd>
+              <dt><a href="/search?q=needle+-hay">needle -hay</a></dt>
+              <dd>Require <code>needle</code> and exclude <code>hay</code>.</dd>
+              <dt><a href="/search?q=%22आदि+काव्य%22">&quot;आदि काव्य&quot;</a></dt>
+              <dd>Find an exact phrase.</dd>
+              <dt><code>file:Jyotisha|Puranani</code></dt>
+              <dd>Include either path fragment.</dd>
+            </dl>
+            <h2>Query syntax</h2>
+            <dl>
+              <dt><code>term1 term2</code></dt>
+              <dd>Require both terms.</dd>
+              <dt><code>term1|term2</code></dt>
+              <dd>Accept either term when regular-expression mode is active.</dd>
+              <dt><code>-term</code></dt>
+              <dd>Exclude matching text.</dd>
+              <dt><code>case:yes</code></dt>
+              <dd>Match letter case exactly.</dd>
+            </dl>
+            <h2>File and path scope</h2>
+            <dl>
+              <dt><code>file:Puranani</code></dt>
+              <dd>Include paths containing <code>Puranani</code>.</dd>
+              <dt><code>-file:gretil</code></dt>
+              <dd>Exclude paths containing <code>gretil</code>.</dd>
+            </dl>
+          </section>
+          <section id="sanchaya-home-about">
+            <h2>About सञ्चयः</h2>
+            <p>
+              सञ्चयः is a customized version of <a href="https://github.com/sourcegraph/zoekt"><em>Zoekt</em></a>,
+              optimized for searching Sanskrit and Indic text collections.
+            </p>
+            <p>{{if .Version}}<em>Zoekt</em> version {{.Version}}, uptime{{else}}Uptime{{end}} {{.Uptime}}.</p>
+            <p>
+              {{.Stats.Documents}} documents, {{HumanUnit .Stats.ContentBytes}}B of searchable text,
+              across {{.Stats.Repos}} repositories.
+            </p>
+          </section>
         </div>
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Quick Tips</h3>
-          </div>
-          <div class="panel-body">
-            <ul>
-              <li>Search for exact phrases using quotes: <code>"आदि काव्य"</code></li>
-              <li>Use <code>file:</code> to search within specific sections, like <code>file:Puranani</code></li>
-              <li>Multi-language support: Sanskrit, Tamil, Prakrit, and English texts are all searchable</li>
-              <li>Sanskrit terms are fully searchable with diacritics</li>
-              <li>Click "Show Advanced Search Options" for more ways to search</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+      </details>
+    </section>
+  </main>
+
   <nav class="navbar navbar-default navbar-bottom">
     <div class="container">
       {{template "footerBoilerplate"}}
-      <p class="navbar-text navbar-right">
-        Used {{HumanUnit .Stats.IndexBytes}} mem for
-        {{.Stats.Documents}} documents ({{HumanUnit .Stats.ContentBytes}})
-        from {{.Stats.Repos}} repositories.
-      </p>
     </div>
   </nav>
-
-  <!-- jQuery (necessary for Bootstrap's JavaScript components) -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  {{template "jsdep"}}
+  <script>
+    (function() {
+      var section = new URLSearchParams(window.location.search).get("section");
+      var details = document.getElementById("sanchaya-home-info-details");
+      var target = document.getElementById("sanchaya-home-" + section);
+      if (!details || !target || (section !== "help" && section !== "about")) return;
+      details.open = true;
+      window.requestAnimationFrame(function() { target.scrollIntoView({block: "start"}); });
+    })();
+  </script>
 </body>
 </html>

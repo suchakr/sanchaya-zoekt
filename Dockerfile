@@ -1,4 +1,4 @@
-FROM golang:1.24-bullseye
+FROM golang:1.25.12-bookworm
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -22,10 +22,6 @@ WORKDIR /app
 
 # Copy config files to container
 COPY ./config /app/config
-
-# Add debug code to verify template loading 
-RUN echo "<!-- DEBUG: THIS FILE WAS MODIFIED BY DOCKERFILE -->" >> /app/config/templates/index.html.tpl
-RUN echo "DEBUG TIMESTAMP: $(date)" >> /app/config/templates/index.html.tpl
 
 # Default command (can be overridden in docker-compose.yml)
 CMD ["zoekt-webserver", "-listen", ":6070", "-index", "/data/index"]
