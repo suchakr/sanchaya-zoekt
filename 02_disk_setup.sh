@@ -1,86 +1,23 @@
 #!/bin/bash
-# 02_disk_setup.sh - Set up disk space for zoekt data
+# 02_disk_setup.sh - Legacy disk setup guard
 
 set -euo pipefail
 
-echo "Stage 2: Setting up persistent disk..."
+echo "Stage 2: Checking disk setup..."
 
-mkdir -p ./.checkpoints
-
-if [ -f ./.checkpoints/02_disk_setup.done ]; then
-    echo "Stage 2 already completed."
-    exit 0
-fi
-
-# Check if running on macOS
 if [[ "$(uname)" == "Darwin" ]]; then
-    echo "Running on macOS. Skipping disk setup (not applicable)."
-    # Create checkpoint
+    echo "Running on macOS. No separate data-disk setup is needed."
+    mkdir -p ./.checkpoints
+    if [ -f ./.checkpoints/02_disk_setup.done ]; then
+        echo "Stage 2 already completed."
+        exit 0
+    fi
     touch ./.checkpoints/02_disk_setup.done
     echo "✅ Stage 2: Disk setup not needed on macOS"
     exit 0
 fi
 
-# Constants
-DOCKER_DATA_ROOT="/mnt/docker-data"
-PERSISTENT_DISK_DEVICE="/dev/sdb"
-PERSISTENT_DISK_LABEL="zoekt-data"
-ZOEKT_DATA_DIR="${DOCKER_DATA_ROOT}/sanchaya-zoekt-data"
-
-# Check for existing partitions
-echo "Checking disk partitioning..."
-PARTITION_COUNT=$(sudo fdisk -l "${PERSISTENT_DISK_DEVICE}" | grep "^/dev" | wc -l)
-echo "${PARTITION_COUNT} partitions found."
-
-if [ "${PARTITION_COUNT}" -eq 0 ]; then
-    echo "Creating new GPT partition table and partition..."
-    sudo parted ${PERSISTENT_DISK_DEVICE} --script mklabel gpt
-    sudo parted ${PERSISTENT_DISK_DEVICE} --script mkpart primary ext4 0% 100%
-    sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard "${PERSISTENT_DISK_DEVICE}1"
-    # Label the partition, not the disk
-    sudo e2label "${PERSISTENT_DISK_DEVICE}1" "${PERSISTENT_DISK_LABEL}"
-    MOUNT_DEVICE="${PERSISTENT_DISK_DEVICE}1"
-else
-    echo "Disk already has partitions, using first partition..."
-    MOUNT_DEVICE="${PERSISTENT_DISK_DEVICE}1"
-fi
-
-# Create mount point and mount disk
-sudo mkdir -p "${DOCKER_DATA_ROOT}"
-sudo mount -o discard,defaults "${MOUNT_DEVICE}" "${DOCKER_DATA_ROOT}"
-
-# Add to fstab for persistent mounting
-echo "LABEL=${PERSISTENT_DISK_LABEL}  ${DOCKER_DATA_ROOT}  ext4  discard,defaults,nofail  0  2" | sudo tee -a /etc/fstab
-
-# Configure Docker to use the mounted volume
-sudo mkdir -p /etc/docker
-echo '{
-    "data-root": "/mnt/docker-data"
-}' | sudo tee /etc/docker/daemon.json
-
-# Restart Docker to apply changes
-sudo systemctl restart docker
-
-# Create Zoekt data directories
-sudo mkdir -p "${ZOEKT_DATA_DIR}/index"
-sudo mkdir -p "${ZOEKT_DATA_DIR}/repos"
-# Set permissions to 777 for maximum compatibility with Docker containers
-sudo chmod -R 777 "${ZOEKT_DATA_DIR}"
-
-# Create checkpoint
-touch ./.checkpoints/02_disk_setup.done
-echo "✅ Stage 2: Disk setup complete"
-
-# Show disk usage and advise user
-echo
-echo "Disk usage summary:"
-df -h
-
-mnt_size=$(df -h | awk '$6=="/mnt/docker-data"{print $2}')
-mnt_size_gb=$(echo "$mnt_size" | grep -oE '^[0-9]+')
-
-if [ -n "$mnt_size_gb" ] && [ "$mnt_size_gb" -ge 90 ]; then
-    echo "✅ /mnt/docker-data is mounted with approximately ${mnt_size} of space."
-else
-    echo "⚠️  Warning: /mnt/docker-data is not mounted with a ~100G disk. Please check your disk setup."
-fi
+echo "Refusing Linux disk setup: this legacy script formats /dev/sdb and mounts it under /mnt." >&2
+echo "On the production Azure VM, /mnt is temporary storage and must not hold persistent data." >&2
+echo "Do not run this script on Linux. Configure persistent storage explicitly under /srv instead." >&2
+exit 2

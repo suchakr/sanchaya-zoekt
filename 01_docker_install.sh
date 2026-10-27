@@ -51,7 +51,7 @@ if ! groups "$USER" | grep -q '\bdocker\b'; then
     echo "  newgrp docker"
     echo
     echo "This will open a new shell with Docker permissions enabled."
-    echo "Then proceed to run 02_disk_setup.sh in the new shell."
+    echo "Then continue with the documented platform-specific storage setup."
     echo "===================================================================="
     exit 0
 fi

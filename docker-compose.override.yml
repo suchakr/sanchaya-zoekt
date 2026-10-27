@@ -4,10 +4,10 @@
 services:
   zoekt-webserver:
     volumes:
-      - ${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}/index:/data/index
+      - ${ZOEKT_DATA_DIR:-/srv/docker-data/sanchaya-zoekt-data}/index:/data/index
       - ./config/templates:/app/config/templates
 
   indexer:
     volumes:
-      - ${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}/index:/data/index
-      - ${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}/repos:/data/repos
+      - ${ZOEKT_DATA_DIR:-/srv/docker-data/sanchaya-zoekt-data}/index:/data/index
+      - ${ZOEKT_DATA_DIR:-/srv/docker-data/sanchaya-zoekt-data}/repos:/data/repos

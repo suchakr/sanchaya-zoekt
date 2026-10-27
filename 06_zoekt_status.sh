@@ -21,7 +21,9 @@ else
         -f docker-compose.override.yml
         -f docker-compose.prod.yml
     )
-    data_dir="${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}"
+    source "$SCRIPT_DIR/zoekt_production_env.sh"
+    load_zoekt_production_env
+    data_dir="$ZOEKT_DATA_DIR"
     endpoint="https://sanchaya.rasowshi.us/"
 fi
 
@@ -30,7 +32,7 @@ compose() {
         docker compose "${compose_files[@]}" "$@"
     else
         sudo env CADDYFILE=./config/Caddyfile.prod \
-            docker compose "${compose_files[@]}" "$@"
+            docker compose --env-file "$ZOEKT_PROD_ENV_FILE" "${compose_files[@]}" "$@"
     fi
 }
 

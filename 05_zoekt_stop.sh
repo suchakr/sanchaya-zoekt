@@ -45,8 +45,10 @@ else
         -f docker-compose.override.yml
         -f docker-compose.prod.yml
     )
+    source "$SCRIPT_DIR/zoekt_production_env.sh"
+    load_zoekt_production_env
     sudo env CADDYFILE=./config/Caddyfile.prod \
-        docker compose "${compose_files[@]}" down
+        docker compose --env-file "$ZOEKT_PROD_ENV_FILE" "${compose_files[@]}" down
 fi
 
 # Verify all containers are stopped

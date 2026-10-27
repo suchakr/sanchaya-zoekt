@@ -3,15 +3,14 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "Stage 3: Preparing Zoekt deployment..."
 
 if [ -f ./.checkpoints/03_zoekt_prep.done ]; then
     echo "Stage 3 already completed."
     exit 0
 fi
-
-# Set the target directory, can be overridden with environment variable
-TARGET_DIR=${ZOEKT_DATA_DIR:-/mnt/docker-data/sanchaya-zoekt-data}
 
 SUDO=sudo
 
@@ -21,6 +20,10 @@ if [[ "$(uname)" == "Darwin" ]]; then
     # On Mac, we'll use local directories
     TARGET_DIR="./data"
     SUDO=""
+else
+    source "$SCRIPT_DIR/zoekt_production_env.sh"
+    load_zoekt_production_env
+    TARGET_DIR="$ZOEKT_DATA_DIR"
 fi
 
 # Ensure the directories exist

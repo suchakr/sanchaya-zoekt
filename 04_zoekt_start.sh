@@ -114,14 +114,17 @@ else
         -f docker-compose.prod.yml
     )
 
+    source "$SCRIPT_DIR/zoekt_production_env.sh"
+    load_zoekt_production_env
+
     sudo env CADDYFILE=./config/Caddyfile.prod \
-        docker compose "${compose_files[@]}" config --quiet
+        docker compose --env-file "$ZOEKT_PROD_ENV_FILE" "${compose_files[@]}" config --quiet
     if [[ "$BUILD" == true ]]; then
         sudo env CADDYFILE=./config/Caddyfile.prod \
-            docker compose "${compose_files[@]}" up -d --build
+            docker compose --env-file "$ZOEKT_PROD_ENV_FILE" "${compose_files[@]}" up -d --build
     else
         sudo env CADDYFILE=./config/Caddyfile.prod \
-            docker compose "${compose_files[@]}" up -d
+            docker compose --env-file "$ZOEKT_PROD_ENV_FILE" "${compose_files[@]}" up -d
     fi
 fi
 

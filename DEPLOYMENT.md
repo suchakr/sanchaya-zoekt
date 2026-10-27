@@ -9,13 +9,19 @@ The normal production checkout is `~/sg/sanchaya-zoekt`.
 - `zoekt-webserver` serves the UI and private RPC on the Docker network.
 - `indexer` is a one-shot corpus refresh and shard build.
 - Persistent repositories and shards live under
-  `/mnt/docker-data/sanchaya-zoekt-data`.
+  the host-configured `ZOEKT_DATA_DIR`, normally
+  `/srv/docker-data/sanchaya-zoekt-data`.
+- The live path is stored in `/etc/sanchaya-zoekt/production.env`; Git pulls do
+  not change it. Production scripts pass that env file to Compose.
+- Docker's `data-root` is a separate host setting in
+  `/etc/docker/daemon.json`. On this VM, `/mnt` is temporary Azure resource
+  storage and must never hold persistent Docker or application data.
 - The Patra Darpan retrieval project joins `sanchaya-zoekt_default`; this
   repository does not build or own Qdrant, retrieval releases, or MCP code.
 - Never use `docker compose down -v` during normal deployment.
 
-The current VM has a small data disk. Run `06_zoekt_status.sh` and inspect free
-space before image builds or corpus reindexing.
+Check free space on `/srv` before image builds or corpus reindexing. Do not
+assume `/mnt` is persistent, even if it has more free space.
 
 ## Canonical workflow
 
@@ -32,6 +38,10 @@ Development:
 Production releases use `main`. Existing hosts on `feat/google-analytics`
 can switch to `main` after confirming the checkout has no tracked changes.
 Changing the checkout alone does not recreate services or rebuild indexes.
+Before using Linux production scripts, ensure
+`/etc/sanchaya-zoekt/production.env` exists and contains the single setting
+`ZOEKT_DATA_DIR=/srv/docker-data/sanchaya-zoekt-data` (or the reviewed host path).
+The tracked `zoekt.env.prod.example` is a template, not the live configuration.
 
 Production release:
 
@@ -52,6 +62,11 @@ changed. Do not stop the service before an ordinary release; the start script
 reconciles the running project. `05_zoekt_stop.sh` is for deliberate shutdown
 or maintenance.
 
+A Docker-root storage migration is not an ordinary release. Do not use
+`04_zoekt_start.sh` for that cutover: its normal `up` includes the one-shot
+indexer. Recreate only the reviewed long-running services with explicit
+`--no-build --pull never`; leave index shards and the indexer untouched.
+
 ## Choose the correct update path
 
 ### Template or long-running service change
@@ -61,7 +76,7 @@ recreate only the long-running services:
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
@@ -79,14 +94,14 @@ Validate the source configuration, then recreate only Caddy:
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
   config --quiet
 
 sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
@@ -102,14 +117,14 @@ Run the one-shot indexer and restart the webserver after success:
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
   run --rm --no-deps indexer
 
 sudo env CADDYFILE=./config/Caddyfile.prod \
-  docker compose \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
@@ -172,11 +187,15 @@ When Patra Darpan retrieval is deployed, additionally verify:
 
 1. Clone the repository to `~/sg/sanchaya-zoekt`.
 2. Run `01_docker_install.sh`.
-3. Attach and prepare persistent storage with `02_disk_setup.sh`.
-4. Run `03_zoekt_prep.sh`.
-5. Confirm DNS and inbound ports 80/443.
-6. Run `04_zoekt_start.sh --build`.
-7. Wait for the indexer and run `06_zoekt_status.sh` plus the smoke checks.
+3. Configure Docker `data-root` at `/srv/docker-data` on persistent storage,
+   preserving existing daemon settings. Do not run `02_disk_setup.sh` on Linux:
+   its old implementation formatted `/dev/sdb` and mounted it under `/mnt`.
+4. Create `/etc/sanchaya-zoekt/production.env` from
+   `zoekt.env.prod.example`, with the reviewed persistent `ZOEKT_DATA_DIR`.
+5. Run `03_zoekt_prep.sh`.
+6. Confirm DNS and inbound ports 80/443.
+7. For a new deployment, run `04_zoekt_start.sh --build`, wait for the indexer,
+   then run `06_zoekt_status.sh` and the smoke checks.
 
 The Patra Darpan companion is deployed separately after the
 `sanchaya-zoekt_default` network exists.
@@ -203,7 +222,7 @@ Stop before deleting data. Inspect:
 ```bash
 ./06_zoekt_status.sh
 docker system df
-df -h /mnt
+df -h /srv /mnt
 ```
 
 Builder-cache cleanup may be safe after inspection. Do not broadly prune

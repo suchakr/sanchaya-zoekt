@@ -20,7 +20,7 @@ services. Generated repositories and indexes live outside Git.
 | Path | Purpose |
 | --- | --- |
 | `01_docker_install.sh` | Docker installation check |
-| `02_disk_setup.sh` | Host data-disk preparation |
+| `02_disk_setup.sh` | macOS no-op; refuses unsafe legacy Linux disk setup |
 | `03_zoekt_prep.sh` | Persistent directory preparation |
 | `04_zoekt_start.sh` | Start or reconcile services; optionally build images |
 | `05_zoekt_stop.sh` | Intentional full shutdown |
@@ -94,7 +94,16 @@ internals and MCP contracts are documented in the Patra Darpan repository under
 ## Data storage
 
 Local development stores repositories and shards under `./data`. Production
-uses `/mnt/docker-data/sanchaya-zoekt-data` through the Linux overlay.
+uses the host-configured `ZOEKT_DATA_DIR` from
+`/etc/sanchaya-zoekt/production.env`, normally
+`/srv/docker-data/sanchaya-zoekt-data` on the Azure VM's persistent OS disk.
+The tracked `zoekt.env.prod.example` is a template; Git pulls do not alter the
+host env file. Production scripts pass that file to Compose explicitly.
+
+On this VM, `/mnt` is the temporary Azure resource disk. Never use it for
+persistent Docker, repository, release, or index data. The Linux behavior in
+`02_disk_setup.sh` is intentionally disabled because its legacy implementation
+formatted `/dev/sdb` and mounted it under `/mnt`.
 
 Do not use `docker compose down -v` during normal operation. It would remove
 named Caddy state, while broad cleanup can also endanger expensive index data.
