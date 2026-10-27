@@ -53,14 +53,13 @@ git status --short --branch
 git fetch origin
 git switch main
 git pull --ff-only origin main
-./04_zoekt_start.sh
 ./06_zoekt_status.sh
 ```
 
-Use `./04_zoekt_start.sh --build` only when the Dockerfile or image dependencies
-changed. Do not stop the service before an ordinary release; the start script
-reconciles the running project. `05_zoekt_stop.sh` is for deliberate shutdown
-or maintenance.
+After pulling, choose the narrow update path below. `04_zoekt_start.sh` brings
+up the full Compose project, including the one-shot indexer; do not use it for a
+routine UI/service update. `05_zoekt_stop.sh` is for deliberate full shutdown,
+not a normal deploy step.
 
 A Docker-root storage migration is not an ordinary release. Do not use
 `04_zoekt_start.sh` for that cutover: its normal `up` includes the one-shot
@@ -71,8 +70,9 @@ indexer. Recreate only the reviewed long-running services with explicit
 
 ### Template or long-running service change
 
-For templates or service configuration that does not affect indexed content,
-recreate only the long-running services:
+For a UI template under `config/templates/`, or service config that does not
+affect indexed content, recreate only the webserver. Templates are bind-mounted;
+this does not build an image or run the indexer:
 
 ```bash
 sudo env CADDYFILE=./config/Caddyfile.prod \
@@ -80,13 +80,35 @@ sudo env CADDYFILE=./config/Caddyfile.prod \
   -f docker-compose.yml \
   -f docker-compose.override.yml \
   -f docker-compose.prod.yml \
-  up -d --no-deps --force-recreate zoekt-webserver caddy
+  up -d --no-deps --no-build --pull never --force-recreate zoekt-webserver
 
 ./06_zoekt_status.sh
 ```
 
-If the Dockerfile or compiled Zoekt binary changed, use
-`./04_zoekt_start.sh --build` instead.
+If the Dockerfile or compiled Zoekt binary changed, build both image outputs,
+but recreate only the webserver. This updates the next indexer's image without
+running an index job:
+
+```bash
+sudo env CADDYFILE=./config/Caddyfile.prod \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
+  -f docker-compose.yml \
+  -f docker-compose.override.yml \
+  -f docker-compose.prod.yml \
+  build zoekt-webserver indexer
+
+sudo env CADDYFILE=./config/Caddyfile.prod \
+  docker compose --env-file /etc/sanchaya-zoekt/production.env \
+  -f docker-compose.yml \
+  -f docker-compose.override.yml \
+  -f docker-compose.prod.yml \
+  up -d --no-deps --no-build --pull never --force-recreate zoekt-webserver
+
+./06_zoekt_status.sh
+```
+
+For a Caddy-only change, use the Caddy-only path below. Only a reviewed corpus
+refresh runs `indexer`.
 
 ### Caddy-only route change
 
@@ -144,6 +166,12 @@ Sanchaya Caddy only when `config/Caddyfile.prod` changed. Do not run the Zoekt
 indexer merely because MCP, OAuth, Qdrant, or retrieval code changed.
 
 ## Verification
+
+There is no dedicated automated UI test suite. Before push, run
+`git diff --check`; after pull, validate the production Compose config and use
+the status and HTTP checks below. For a text/template edit, also verify the
+changed text in the rendered UI; HTTP 200 alone does not prove the copy is
+correct.
 
 Start with:
 

@@ -56,7 +56,7 @@ Open `http://localhost:6070`. Stop the project intentionally with:
 Use `--build` on first start or after Dockerfile/dependency changes. A normal
 restart does not require it.
 
-## Normal operation
+## Full-stack local lifecycle
 
 The numbered scripts select the correct macOS or Linux Compose overlays:
 
@@ -67,10 +67,12 @@ The numbered scripts select the correct macOS or Linux Compose overlays:
 ```
 
 `04_zoekt_start.sh` starts the one-shot indexer as well as the long-running
-services. During indexing the indexer may be `Up`; success is `Exited (0)`.
+services. Use it for a full start or intentional corpus refresh, not a routine
+production UI update. During indexing the indexer may be `Up`; success is
+`Exited (0)`. `05_zoekt_stop.sh` deliberately shuts down the whole project.
 
-For production release, corpus-refresh, verification, and rollback procedures,
-see [`DEPLOYMENT.md`](DEPLOYMENT.md).
+For production change classification, targeted build/deploy, verification, and
+rollback procedures, see [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 ## Retrieval companion boundary
 
